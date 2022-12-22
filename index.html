@@ -8,790 +8,96 @@
 <h2>Hello OpenCV.js</h2>
 <p id="status">OpenCV.js is loading...</p>
 <div>
+  <!-- <div class="inputoutput">
+    <h2>video</h2>
+    <video id="videoInput" height="960px" width="1440"></video>
+  </div>
   <div class="inputoutput">
-    <img id="imageSrc" alt="No Image" />
+    <canvas id="canvasOutput01" ></canvas>
+    <div class="caption">canvasOutput01</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput02" ></canvas>
+    <div class="caption">canvasOutput02</div>
+  </div> -->
+  <div class="inputoutput">
+    <img id="imageSrc" alt="No Image" style="display: none;" />
     <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput" ></canvas>
     <div class="caption">canvasOutput</div>
   </div>
-  <div class="inputoutput">
+  <div class="inputoutput" style="display: none;">
     <canvas id="canvasOutput2" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput2</div>
   </div>
-  <div class="inputoutput">
+  <div class="inputoutput" style="display: none;" >
     <canvas id="canvasOutput3" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput3</div>
   </div>
-  <div class="inputoutput">
+  <div class="inputoutput" style="display: none;" >
     <canvas id="canvasOutput4" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput4</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput5" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput5</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput51" ></canvas>
+    <div class="caption">canvasOutput51</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput52" ></canvas>
+    <div class="caption">canvasOutput52</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput53" ></canvas>
+    <div class="caption">canvasOutput53</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput54" ></canvas>
+    <div class="caption">canvasOutput54</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput6" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput6</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput7" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput7</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput8" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput8</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput9" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput9</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput10" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput10</div>
   </div>
   <div class="inputoutput">
     <canvas id="canvasOutput11" ></canvas>
-    <div class="caption">canvasOutput</div>
+    <div class="caption">canvasOutput11</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput12" ></canvas>
+    <div class="caption">canvasOutput12</div>
+  </div>
+  <div class="inputoutput">
+    <canvas id="canvasOutput13" ></canvas>
+    <div class="caption">canvasOutput13</div>
   </div>
 </div>
 <script async src="js/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-<script type="text/javascript">
-let imgElement = document.getElementById('imageSrc');
-let inputElement = document.getElementById('fileInput');
-inputElement.addEventListener('change', (e) => {
-  imgElement.src = URL.createObjectURL(e.target.files[0]);
-  console.log(imgElement);
-  console.log(e.target.files);
-}, false);
-imgElement.onload = function() {
-  console.log(imgElement);
-  let src = cv.imread(imgElement);
-  console.log(src);
-  let dst = new cv.Mat();
-  let dsize = new cv.Size(300, 300);
-  let src2 = cv.imread(imgElement);
-  let finalDst = new cv.Mat();
-  let dsize2 = new cv.Size(300,300);
-
-
-  
-  cv.threshold(src, dst, 130, 50, cv.THRESH_TOZERO);
-
-  
-
-
-  cv.resize(dst, dst, dsize, 0, 0, cv.INTER_AREA);
-  cv.resize(src2, finalDst, dsize, 0, 0, cv.INTER_AREA);
-  cv.imshow('canvasOutput', dst);
-
-
-
-
-  
-  
-  cv.convertScaleAbs(dst, dst, 1.9, 70);
-  //cv.equalizeHist(dst, dst);
-    cv.cvtColor(dst, dst, cv.COLOR_BGR2RGB, 0);
-  cv.imshow('canvasOutput3', dst);  
-
- 
-  cv.cvtColor(dst, dst, cv.COLOR_BGR2GRAY, 0);
-  cv.cvtColor(dst, dst, cv.COLOR_BGR2RGB, 0);
-  cv.imshow('canvasOutput4', dst);
-
-
-    
-
-  /*cv.cvtColor(dst, dst, cv.COLOR_BGR2GRAY, 0);
-  let ksize = new cv.Size(3, 3);
-  cv.GaussianBlur(dst, dst, ksize, 0, 0, cv.BORDER_DEFAULT);
-  cv.cvtColor(dst, dst, cv.COLOR_BGR2RGB, 0);
-  cv.imshow('canvasOutput3', dst);*/
-
-
-    
-
-let M = cv.Mat.ones(5, 5, cv.CV_8U);
-  let anchor = new cv.Point(-1, -1);
-
-  //cv.threshold(dst,dst,200, 177,cv.THRESH_OTSU);
-// You can try more different parameters
-cv.erode(dst, dst, M, anchor, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-cv.cvtColor(dst, dst, cv.COLOR_BGR2RGB, 0);
-  cv.imshow('canvasOutput5', dst);  
-//const kernel = cv.getStructuringElement(cv.MORPH_RECT,new cv.Size(5,5));
-//cv.getStructuringElement(cv.MORPH_RECT, (9, 9))
-//cv.dilate(dst, dst, M, kernel, 1, cv.BORDER_CONSTANT, cv.morphologyDefaultBorderValue());
-
-
-
-let dst2 = cv.Mat.zeros(dst.cols, dst.rows, cv.CV_8UC3);
-let dst3 = cv.Mat.zeros(dst.cols, dst.rows, cv.CV_8UC3);
-let dst4 = cv.Mat.zeros(dst.cols, dst.rows, cv.CV_8UC3);
-
-  cv.cvtColor(dst, dst, cv.COLOR_RGB2GRAY, 0);
-  cv.Canny(dst, dst, 480, 85, 3, false);
-  cv.cvtColor(dst, dst, cv.COLOR_BGR2RGB, 0);
-  cv.imshow('canvasOutput6', dst);
-
-
-
-  
-  let contours = new cv.MatVector();
-
-
-  let hierarchy = new cv.Mat();
-
-
-  let color = new cv.Scalar(0,255,0);
-
-  cv.cvtColor(dst, dst, cv.COLOR_RGBA2GRAY, 0);
-    cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
-  //let contours = new cv.MatVector();
-  //  let hierarchy = new cv.Mat();
-    // You can try more different parameters
-    cv.findContours(dst, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    //console.log(contours);
-    /*for (let i = 0; i < contours.size(); ++i) {
-
-        let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-
-        console.log(contours.get(i));
-        console.log("R."+red+" G."+green+" B."+blue);
-        let color2 =  new cv.Scalar(red,green, blue);   
-    
-    cv.drawContours(dst2, contours, i, color2, 1, cv.LINE_8, hierarchy, 100);
-    }
-    cv.cvtColor(dst2, dst2, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput8', dst2);*/
-    let contour = contours.get(0).clone(); 
-
-    let hull = new cv.MatVector();
-    for (let i = 0; i < contours.size(); ++i) {
-        
-        
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
-        // You can try more different parameters
-        cv.convexHull(cnt, tmp, false, true);
-        //console.log(tmp);
-        
-
-        hull.push_back(tmp);
-        cnt.delete(); tmp.delete();
-    }
-    for (let i = 0; i < contours.size(); ++i) {
-        let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-
-        //console.log(contours.get(i));
-        //console.log("R."+red+" G."+green+" B."+blue);
-        let color2 =  new cv.Scalar(red,green, blue);  
-        let area = cv.contourArea(contours.get(i), false);
-        let perim = cv.arcLength(contours.get(i), false);
-
-        
-
-        if(cv.arcLength(contours.get(i), false)>=cv.arcLength(contour, false)){
-            contour=contours.get(i).clone();
-
-            
-        }
-        /*console.log(area);
-        console.log(perim);
-        console.log("Je passe ici !");*/
-
-       cv.drawContours(dst2, hull, i, color2, 1, cv.LINE_8, hierarchy, 0);
-
-        
-            
-    } console.log(contour);
-    cv.cvtColor(dst2, dst2, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput7', dst2);
-
-    let contourVec = new cv.MatVector();
-    contourVec.push_back(contour);
-    cv.drawContours(dst3, contourVec, 0, new cv.Scalar(0,255,0), 1, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(dst3, dst3, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput8', dst3);
-
-    let tmp = new cv.Mat();
-    let hull2 = new cv.MatVector();
-    cv.convexHull(contour, tmp, true, true);
-    hull2.push_back(tmp);
-    cv.drawContours(dst4, hull2, 0, new cv.Scalar(255,0,0), 1, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(dst4, dst4, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput9', dst4);
-
-
-    cv.drawContours(finalDst, hull2, 0, new cv.Scalar(0,255,0), 1, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(finalDst, finalDst, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput9', finalDst);
-
-
-    /*let extLeft = new cv.Point();
-    let extBot = new cv.Point();
-    let extRight = new cv.Point();
-    let extTop = new cv.Point();*/
-
-    /*let extLeft = tuple(c[c[:, :, 0].argmin()][0])
-    let extRight = tuple(c[c[:, :, 0].argmax()][0])
-    let extTop = tuple(c[c[:, :, 1].argmin()][0])
-    let extBot = tuple(c[c[:, :, 1].argmax()][0])*/
-
-    /*cv.circle(dst4, extLeft, 8, (0, 0, 255), -1);
-    cv.circle(dst4, extRight, 8, (0, 255, 0), -1);
-    cv.circle(dst4, extTop, 8, (255, 0, 0), -1);
-    cv.circle(dst4, extBot, 8, (255, 255, 0), -1);*/
-    
-
-    /*let startPoint;let endPoint;
-    for (let i = 0; i < hull2.rows; i++) {
-     startPoint = new cv.Point(hull2.data32S[i * 4], hull2.data32S[i * 4 + 1]);
-     endPoint = new cv.Point(hull2.data32S[i * 4 + 2], hull2.data32S[i * 4 + 3]);
-    }*/
-
-    //console.log(cv.matFromArray(4, 1, cv.CV_32SC2, hull2.data32S));
-    //console.log(endPoint);
-
-    //cv.drawContours(src2, hull2, 0, new cv.Scalar(255,0,0), 1, cv.LINE_8, hierarchy, 0);
-    //cv.imshow('canvasOutput9', src2);
-
-
-    console.log(tmp.data32S);
-
-    let array = new Array();
-
-    for(let i=0; i<tmp.data32S.length; i+=2){
-
-        array.push({x:tmp.data32S[i], y:tmp.data32S[i+1]});
-        
-    }
-    
-    console.log(array);
-   
-
-    let c1 =getMinXMinY(array);
-    let c2 = getMaxXMinY(array);
-   
-    let c3=getMinXMaxY(array);
-    let c4= getMaxXMaxY(array);
-
-    let bottomLeft = new cv.Point(c1[0].x, c1[0].y);
-    let topLeft = new cv.Point(c2[0].x, c2[0].y);
-    let bottomRight =new cv.Point(c3[0].x, c3[0].y);
-    let topRight = new cv.Point(c4[0].x, c4[0].y);
-
-    console.log(bottomRight.x);
-
-
-    /*
-    widthA = np.sqrt(((br[0] - bl[0]) ** 2) + ((br[1] - bl[1]) ** 2))
-    widthB = np.sqrt(((tr[0] - tl[0]) ** 2) + ((tr[1] - tl[1]) ** 2))
-    # compute the height of the new image
-    heightA = np.sqrt(((tr[0] - br[0]) ** 2) + ((tr[1] - br[1]) ** 2))
-    heightB = np.sqrt(((tl[0] - bl[0]) ** 2) + ((tl[1] - bl[1]) ** 2))
-    */
-
-
-    let widthA = Math.sqrt(Math.pow((bottomRight.x-bottomLeft.x), 2) + Math.pow((bottomRight.y - bottomLeft.y) , 2));
-    let widthB = Math.sqrt(Math.pow((topRight.x - topLeft.x) , 2) + Math.pow((topRight.y -topLeft.y) , 2));
-    //# compute the height of the new image
-    let heightA = Math.sqrt(Math.pow((topRight.x - bottomRight.x) , 2) + Math.pow((topRight.y - bottomRight.y),2));
-    let heightB = Math.sqrt(Math.pow((topLeft.x - bottomLeft.x) , 2) + Math.pow((topLeft.y - bottomLeft.y) , 2));
-
-    console.log(widthA);
-    console.log(widthB);
-    console.log(heightA);
-    console.log(heightB);
-
-    let maxWidth = Math.max(parseInt(widthA), parseInt(widthB));
-    let maxHeight = Math.max(parseInt(heightA), parseInt(heightB));
-
-    console.log(maxHeight);
-    console.log(maxWidth);
-
-
-
-
-    let srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [topLeft.x, topLeft.y, topRight.x, topRight.y, bottomLeft.x, bottomLeft.y,bottomRight.x, bottomRight.y]);
-    let dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, maxWidth-1, 0, 0, maxWidth-1, maxHeight-1, maxHeight-1]);
-    let M2 = cv.getPerspectiveTransform(srcTri, dstTri);
-
-    let finalDst2 = new cv.Mat();
-    let dsize3 = new cv.Size(maxWidth, maxHeight);
-
-    cv.warpPerspective(finalDst, finalDst2, M2, dsize3, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
-    cv.cvtColor(finalDst2, finalDst2, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput10', finalDst2);
-
-    let dsize4 = new cv.Size(maxWidth*2,maxHeight*2);
-    cv.resize(finalDst2, finalDst2, dsize4, 0, 0, cv.INTER_AREA);
-    cv.imshow('canvasOutput11', finalDst2);
-
-
-
-
-
-
-  /*contours = new cv.MatVector();
-  cv.cvtColor(dst2, dst2, cv.COLOR_RGB2GRAY, 0);
-cv.findContours(dst2, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);*/
-
-//<Sort resulting contours by area to get largest>
-
- /*
-  
-  let edgeDetected = new cv.Mat();
- 
-  
-  let foundContour = new cv.MatVector();
-
-  //Get area for all contours so we can find the biggest
-  let sortableContours = [];
-  for (let i = 0; i < hull2.size(); i++) {
-    let cnt = hull2.get(i);
-    let area = cv.contourArea(cnt, false);
-    let perim = cv.arcLength(cnt, false);
-    console.log(area);
-    console.log(perim);
-    console.log("Je passe ici !");
-
-    let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-    let color = new cv.Scalar(red, green, blue);
-
-    sortableContours.push({ areaSize: area, perimiterSize: perim, contour: cnt, color: color  });
-    console.log(sortableContours);
-
-    
-  }
-
- */
-  
-
-  //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
-  /*let approx = new cv.Mat();
-  cv.approxPolyDP(sortableContours[0].contour, approx, 0.005, true);
-
-  if (approx.rows >= 4) {
-    console.log('Found a 4-corner approx');
-    foundContour = approx;
-  }
-  else{
-    console.log('No 4-corner large contour!');
-    return;
-  }
-
-  //Find the corners
-  let corner1 = new cv.Point(foundContour.data32S[0], foundContour.data32S[1]);
-  let corner2 = new cv.Point(foundContour.data32S[2], foundContour.data32S[3]);
-  let corner3 = new cv.Point(foundContour.data32S[4], foundContour.data32S[5]);
-  let corner4 = new cv.Point(foundContour.data32S[6], foundContour.data32S[7]);
-
-  console.log(corner1);
-  console.log(corner2);
-  console.log(corner3);
-  console.log(corner4);
-
-  //Order the corners
-  let cornerArray = new cv.MatVector();
-  cornerArray = [{ corner: corner1 }, { corner: corner2 }, { corner: corner3 }, { corner: corner4 }];
-  //Sort by Y position (to get top-down)
-  cornerArray.sort((item1, item2) => { 
-    return (item1.corner.y < item2.corner.y) ? -1 : (item1.corner.y > item2.corner.y) ? 1 : 0; 
-  }).slice(0, 5);
-  
-  console.log(cornerArray);
-
-  for (c of cornerArray) {
-    cv.drawContours(dst3, c.corner, -1, c.color, 1, cv.LINE_8, hierarchy, 100);
-  }
-
-  cv.imshow('canvasOutput8', dst3);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-  let color = new cv.Scalar(0,255,0);
-
-  cv.cvtColor(dst, dst, cv.COLOR_RGBA2GRAY, 0);
-    cv.threshold(dst, dst, 120, 200, cv.THRESH_BINARY);
-  //let contours = new cv.MatVector();
-  //  let hierarchy = new cv.Mat();
-    // You can try more different parameters
-    cv.findContours(dst2, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
-    console.log(contours);
-    /*for (let i = 0; i < contours.size(); ++i) {
-
-        let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-
-        console.log(contours.get(i));
-        console.log("R."+red+" G."+green+" B."+blue);
-        let color2 =  new cv.Scalar(red,green, blue);   
-    
-    cv.drawContours(dst2, contours, i, color2, 1, cv.LINE_8, hierarchy, 100);
-    }
-    cv.cvtColor(dst2, dst2, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput8', dst2);*/
-
-/*
-    let hull = new cv.MatVector();
-    for (let i = 0; i < contours.size(); ++i) {
-        
-        
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
-        // You can try more different parameters
-        cv.convexHull(cnt, tmp, true, true);
-        hull.push_back(tmp);
-        cnt.delete(); tmp.delete();
-    }
-    for (let i = 0; i < contours.size(); ++i) {
-        let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-
-        console.log(contours.get(i));
-        console.log("R."+red+" G."+green+" B."+blue);
-        let color2 =  new cv.Scalar(red,green, blue);  
-    
-        cv.drawContours(dst3, hull, i, color2, 1, cv.LINE_8, hierarchy, 0);
-    }
-    cv.cvtColor(dst3, dst3, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput9', dst3);
-
-    /*let poly = new cv.MatVector();
-    getCardContour(contours, poly);*/
-    /*for (let i = 0; i < contours.size(); ++i) {
-        
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
-        // You can try more different parameters
-        let perimeter =cv.arcLength(contours.get(i), true);
-        console.log(perimeter);
-        cv.approxPolyDP(cnt, tmp, perimeter*0.032, true);
-        poly.push_back(tmp);
-        cnt.delete(); tmp.delete();
-    }*/
-
-    //dst2 = convertImageToLineDrawing(dst);
-    /*for (let i = 0; i < contours.size(); ++i) {
-    
-        cv.drawContours(dst2, poly, i, color, 1, cv.LINE_8, hierarchy, 0);
-    }
-    cv.cvtColor(dst2, dst2, cv.COLOR_BGR2RGB, 0);*/
-    //cv.imshow('canvasOutput8', dst2);
-
-    
-  dst.delete();
-  dst2.delete();
-};
-function onOpenCvReady() {
-  document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-}
-
-function approximateContour(contour, tmp, i){
-    let peri = cv.arcLength(contour, true)
-    cv.approxPolyDP(contour, tmp, 0.0032 * peri, true)
-    return i+1;
-}
-function getCardContour(contours, poly) {  
-    let j=0;
-    for (let i = 0; i < contours.size(); ++i) {
-
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
-        
-        approximateContour(cnt, tmp, j)
-        poly.push_back(tmp);
-        if(j==4){
-            i=contours.size()+1;
-            cnt.delete(); tmp.delete();
-        }
-    }
-
-}
-
-function convertImageToLineDrawing(img) {
-    const kernel = cv.getStructuringElement(cv.MORPH_RECT,new cv.Size(5,5));
-
-    const imgGray = new cv.Mat();
-    cv.cvtColor(img, imgGray, cv.COLOR_RGBA2GRAY);
-
-    const imgDilated = new cv.Mat();
-    cv.dilate(imgGray, imgDilated, kernel, new cv.Point(-1, 1), 1);
-
-    const imgDiff = new cv.Mat();
-    cv.absdiff(imgDilated, imgGray, imgDiff);
-
-    const contour = new cv.Mat();
-    cv.bitwise_not(imgDiff, contour);
-    return contour;
-}
-
-
-function getMinXMinY(array){
-
-    /*let minX =
-
-    for(let i=0; i<array.length-2; i+=2){
-
-    
-        if(array[i+2]<=array[i] && array[i+3]<=array[i+1]){
-            minX = 
-        }
-
-    }*/
-
-    let xMin=301;
-    let yMin=301;
-    let array2 = new Array();
-
-    for(let i=0; i<array.length; i++){
-    
-        if(array[i].x<xMin){
-            xMin= array[i].x;
-        }
-
-    }
-    //console.log(xMin);
-
-    for(let i=0; i<array.length; i++){
-        if(array[i].x==xMin){
-            array2.push(array[i]);
-        }
-    }
-
-    for(let i=0; i<array2.length-1; i++){
-        if(array2[i].y<=yMin){
-            yMin=array2[i].y;
-        }
-    }
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].y!=yMin){
-            array2.splice(i);
-        }
-    }
-
-    console.log(array2);
-    return array2;
-
-}
-
-function getMaxXMinY(array){
-    
-    let xMax=0;
-    let yMin=301;
-    let array2 = new Array();
-
-    for(let i=0; i<array.length; i++){
-    
-        if(array[i].y<yMin){
-            yMin=array[i].y;
-        }
-
-    }
-    //console.log(yMin);
-
-    for(let i=0; i<array.length; i++){
-        if(array[i].y==yMin){
-            
-            array2.push(array[i]);
-        }
-    }
-    //.log(array2);
-
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].x>=xMax){
-            xMax=array2[i].x;
-        }
-    }
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].x!=xMax){
-            array2.splice(i);
-        }
-    }
-    console.log(array2);
-    return array2;
-
-}
-
-function getMaxXMaxY(array){
-
-    let xMax=0;
-    let yMax=0;
-    let array2 = new Array();
-
-    for(let i=0; i<array.length; i++){
-    
-        if(array[i].x>xMax){
-            xMax=array[i].x;
-        }
-
-    }
-    //console.log(xMax);
-
-    for(let i=0; i<array.length; i++){
-        if(array[i].x==xMax){
-            
-            array2.push(array[i]);
-        }
-    }
-    //console.log(array2);
-
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].y>=yMax){
-            yMax=array2[i].y;
-        }
-    }
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].y!=yMax){
-            array2.splice(i);
-        }
-    }
-    console.log(array2);
-    return array2;
-    
-}
-function getMinXMaxY(array){
-
-    let xMin=301;
-    let yMax=0;
-    let array2 = new Array();
-
-    for(let i=0; i<array.length; i++){
-    
-        if(array[i].y>yMax){
-            yMax=array[i].y;
-        }
-
-    }
-    //console.log(xMin);
-
-    for(let i=0; i<array.length; i++){
-        if(array[i].y==yMax){
-            
-            array2.push(array[i]);
-        }
-    }
-    //console.log(array2);
-
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].x<=xMin){
-            xMin=array2[i].x;
-        }
-    }
-
-    for(let i=0; i<array2.length; i++){
-        if(array2[i].x!=xMin){
-            array2.splice(i);
-        }
-    }
-    console.log(array2);
-    return array2;
-}
-
-
-
-/*
-function wrap_perspective(img, rect){
-
-    let tl = rect[0];
-    let tr = rect[1];
-    let br = rect[2];
-    let bl = rect[3];
-
-    //# unpack rectangle points: top left, top right, bottom right, bottom left
-
-    //# compute the width of the new image
-    let widthA = Math.sqrt(((br[0] - bl[0]) * 2) + ((br[1] - bl[1]) * 2))
-    let widthB = Math.sqrt(((tr[0] - tl[0]) * 2) + ((tr[1] - tl[1]) * 2))
-    //# compute the height of the new image
-    let heightA = Math.sqrt(((tr[0] - br[0]) * 2) + ((tr[1] - br[1]) * 2))
-    let heightB = Math.sqrt(((tl[0] - bl[0]) * 2) + ((tl[1] - bl[1]) * 2))
-    //# take the maximum of the width and height values to reach
-    //# our final dimensions
-    maxWidth = Math.max(parseInt(widthA), parseInt(widthB))
-    maxHeight = Math.max(parseInt(heightA), parseInt(heightB))
-    //# destination points which will be used to map the screen to a "scanned" view
-    let dst = Array([
-        [0, 0],
-        [maxWidth - 1, 0],
-        [maxWidth - 1, maxHeight - 1],
-        [0, maxHeight - 1]])
-    //# calculate the perspective transform matrix
-
-
-
-    let dsize = new cv.Size(src.rows, src.cols);
-// (data32F[0], data32F[1]) is the first point
-// (data32F[2], data32F[3]) is the sescond point
-// (data32F[4], data32F[5]) is the third point
-// (data32F[6], data32F[7]) is the fourth point
-let srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [56, 65, 368, 52, 28, 387, 389, 390]);
-let dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, 300, 0, 0, 300, 300, 300]);
-let M = cv.getPerspectiveTransform(srcTri, dstTri);
-// You can try more different parameters
-cv.warpPerspective(src, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
-cv.imshow('canvasOutput', dst);
-    M = cv.getPerspectiveTransform(rect, dst)
-    //# warp the perspective to grab the screen
-    return cv2.warpPerspective(img, M, (maxWidth, maxHeight))
-}
-/*
-function contour_to_rect(contour){
-    pts = contour.reshape(4, 2)
-    rect = np.zeros((4, 2), dtype = "float32")
-    //# top-left point has the smallest sum
-    //# bottom-right has the largest sum
-    s = pts.sum(axis = 1)
-    rect[0] = pts[np.argmin(s)]
-    rect[2] = pts[np.argmax(s)]
-    //# compute the difference between the points:
-    //# the top-right will have the minumum difference 
-    //# the bottom-left will have the maximum difference
-    diff = np.diff(pts, axis = 1)
-    rect[1] = pts[np.argmin(diff)]
-    rect[3] = pts[np.argmax(diff)]
-    return rect / resize_ratio
-}*/
-
+<script type="text/javascript" src="./js/processing.js"></script>
+<script type="text/javascript" src="./js/corners.js"></script>
+<script type="text/javascript" src="./js/video.js"></script>
+<!-- <script type="text/javascript" src="./js/processingOriginal.js"> -->
 </script>
 
 </body>
