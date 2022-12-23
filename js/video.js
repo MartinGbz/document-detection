@@ -1,66 +1,71 @@
-// let video = document.getElementById("videoInput"); // video is the id of video tag
-// let canvasFrame = document.getElementById("canvasOutput01"); // canvasFrame is the id of <canvas>
-// let context = canvasFrame.getContext("2d");
-// let src = new cv.Mat(height, width, cv.CV_8UC4);
-// let dst = new cv.Mat(height, width, cv.CV_8UC1);
-// const FPS = 30;
+// let video = document.getElementById('videoInput');
 
-// window.addEventListener("load", (event) => {
-//     console.log("page is fully loaded");
-//     videoTest();
-// });
-
-// function videoTest() {
-//     console.log('hey')
-//     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+// navigator.mediaDevices.getUserMedia({ video: true, audio: false })
 //     .then(function(stream) {
 //         video.srcObject = stream;
 //         video.play();
-//         // schedule first one.
-//         setTimeout(processVideo, 0);
 //     })
 //     .catch(function(err) {
 //         console.log("An error occurred! " + err);
 //     });
-// }
 
-// function processVideo() {
-//     let begin = Date.now();
-//     context.drawImage(video, 0, 0, width, height);
-//     src.data.set(context.getImageData(0, 0, width, height).data);
-//     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-//     cv.imshow("canvasOutput02", dst); // canvasOutput is the id of another <canvas>;
-//     // schedule next one.
-//     let delay = 1000/FPS - (Date.now() - begin);
-//     setTimeout(processVideo, delay);
-// }
-
-
-
-
-
-
-// let src;
-// let dst;
-// let cap;
 // const FPS = 30;
 // function processVideo() {
+//     let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+//     let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+//     let cap = new cv.VideoCapture(video);
 //     let begin = Date.now();
 //     cap.read(src);
 //     cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-//     cv.imshow("canvasOutput01", dst);
+//     cv.imshow("canvasOutput", dst);
 //     // schedule next one.
 //     let delay = 1000/FPS - (Date.now() - begin);
 //     setTimeout(processVideo, delay);
 // }
 
-// function onOpenCvReady() {
-//     document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-//     console.log('hey')
-//     src = new cv.Mat(960, 1440, cv.CV_8UC4);
-//     dst = new cv.Mat(960, 1440, cv.CV_8UC1);
-//     cap = new cv.VideoCapture('videoInput');
-//     // schedule first one.
-//     setTimeout(processVideo, 0);
-// }
-   
+// // schedule first one.
+// setTimeout(processVideo, 2000);
+
+
+let video = document.getElementById("videoInput"); // video is the id of video tag
+video.width = 640;
+video.height = 480;
+navigator.mediaDevices
+  .getUserMedia({ video: true, audio: false })
+  .then(function(stream) {
+    video.srcObject = stream;
+    video.play();
+
+    let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+    let dst = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+    let cap = new cv.VideoCapture(video);
+
+    const FPS = 30;
+    function processVideo() {
+      try {
+        // if (!streaming) {
+        //   // clean and stop.
+        //   src.delete();
+        //   dst.delete();
+        //   return;
+        // }
+        let begin = Date.now();
+        // start processing.
+        cap.read(src);
+        dst = globalProcess(src);
+        // cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+        cv.imshow("canvasOutput", dst);
+        // schedule the next one.
+        let delay = 1000 / FPS - (Date.now() - begin);
+        setTimeout(processVideo, delay);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // schedule the first one.
+    setTimeout(processVideo, 0);
+  })
+  .catch(function(err) {
+    console.log("An error occurred! " + err);
+  });

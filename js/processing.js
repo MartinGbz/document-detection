@@ -114,8 +114,8 @@ function filtersProcess() {
     // Billateral filter
     // cv.bilateralFilter(gray, test1, 10, 500, 1, cv.BORDER_CONSTANT)
     // cv.bilateralFilter(gray, test1, 9, 75, 75, cv.BORDER_CONSTANT)
-    cv.bilateralFilter(gray, test1, 5, 5, 5, cv.BORDER_CONSTANT)
-    cv.imshow('canvasOutput5', test1);
+    // cv.bilateralFilter(gray, test1, 5, 5, 5, cv.BORDER_CONSTANT)
+    // cv.imshow('canvasOutput5', test1);
 
     // cv.adaptiveThreshold(test1, test1, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 115, 4)
     // cv.imshow('canvasOutput51', test1);
@@ -126,11 +126,12 @@ function filtersProcess() {
     // cv.copyMakeBorder(test1, test1, 5, 5, 5, 5, cv.BORDER_CONSTANT, value=[0, 0, 0, 0])
     // cv.imshow('canvasOutput53', test1);
     
-    // let ksize = new cv.Size(17, 17);
+    let ksize = new cv.Size(17, 17);
     // let ksize = new cv.Size(5, 5);
     // let ksize = new cv.Size(29, 29);
-    // cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
-    // cv.imshow('canvasOutput5', test1);
+    // let ksize = new cv.Size(11, 11);
+    cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
+    cv.imshow('canvasOutput5', test1);
 
     // test2 = new cv.Mat();
     // // Billateral filter
@@ -155,7 +156,7 @@ function filtersProcess() {
 
     // Canny filter
     // cv.Canny(gray, edged, 200, 250)
-    cv.Canny(eq, edged, 75, 125)
+    cv.Canny(eq, edged, 75, 200)
     cv.imshow('canvasOutput7', edged);
 
     console.log('edged:', edged)
