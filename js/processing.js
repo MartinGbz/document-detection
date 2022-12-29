@@ -1,11 +1,7 @@
 let imgElement = document.getElementById('imageSrc');
 let inputElement = document.getElementById('fileInput');
 
-inputElement.addEventListener('change', (e) => {
-  imgElement.src = URL.createObjectURL(e.target.files[0]);
-  console.log(imgElement);
-  console.log(e.target.files);
-}, false);
+
 
 //IDEA:
 // - cac-lculer le nombre de contours et en fonction de ça ça me permet de savor si je doit augementer le history equalizer ou pas
@@ -37,8 +33,24 @@ let hull;
 
 let contourSelected;
 
-let width = 1008;
-let height = 756;
+// let width = 1008;
+// let height = 756;
+
+imgElement.addEventListener('load', (e) => {
+    console.log('Hauteur de l\'image:', imgElement.height);
+    console.log('Largeur de l\'image:', imgElement.width);
+    width = imgElement.width;
+    height = imgElement.height;
+}, false);
+
+inputElement.addEventListener('change', (e) => {
+    imgElement.src = URL.createObjectURL(e.target.files[0]);
+    //   console.log(imgElement);
+    //   console.log(e.target.files[0]);
+    //   console.log(e.target.files);
+    //   console.log(e);
+}, false);
+
 
 imgElement.onload = function() {
     console.log('hey');
@@ -50,6 +62,7 @@ imgElement.onload = function() {
     contours = new cv.MatVector();
     hierarchy = new cv.Mat();
     cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    console.log('contours.size():', contours.size())
 
     // show all contours found
     drawAllContours();
@@ -125,17 +138,10 @@ function filtersProcess() {
 
     // cv.copyMakeBorder(test1, test1, 5, 5, 5, 5, cv.BORDER_CONSTANT, value=[0, 0, 0, 0])
     // cv.imshow('canvasOutput53', test1);
-    
-    let ksize = new cv.Size(17, 17);
-    // let ksize = new cv.Size(5, 5);
-    // let ksize = new cv.Size(29, 29);
-    // let ksize = new cv.Size(11, 11);
-    cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
-    cv.imshow('canvasOutput5', test1);
 
-    // test2 = new cv.Mat();
-    // // Billateral filter
-    // cv.bilateralFilter(gray, test2, 5, 5, 5, cv.BORDER_REPLICATE)
+        // test2 = new cv.Mat();
+    // Billateral filter
+    // cv.bilateralFilter(gray, test2, 5, 5, 5, cv.BORDER_DEFAULT)
     // cv.imshow('canvasOutput52', test2);
 
     // test3 = new cv.Mat();
@@ -147,19 +153,32 @@ function filtersProcess() {
     // // Billateral filter
     // cv.bilateralFilter(gray, test4, 5, 5, 5, cv.BORDER_WRAP)
     // cv.imshow('canvasOutput54', test4);
-
-    // ----------------------------------------
+    
+    // let ksize = new cv.Size(5, 5);
+    let ksize = new cv.Size(7, 7);
+    // let ksize = new cv.Size(5, 5);
+    // let ksize = new cv.Size(29, 29);
+    // let ksize = new cv.Size(11, 11);
+    cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
+    cv.imshow('canvasOutput5', test1);
 
     // Equalize histoigram
     cv.equalizeHist(test1, eq)
     cv.imshow('canvasOutput6', eq);
 
-    // Canny filter
-    // cv.Canny(gray, edged, 200, 250)
-    cv.Canny(eq, edged, 75, 200)
+    cv.Canny(eq, edged, 255, 0)
     cv.imshow('canvasOutput7', edged);
 
-    console.log('edged:', edged)
+    console.log('edged:', edged)   
+
+    // while(!contours || contours.size() > 200) {
+    //     // Canny filter
+    //     // cv.Canny(gray, edged, 200, 250)
+    //     cv.Canny(eq, edged, 50, 200)
+    //     cv.imshow('canvasOutput7', edged);
+
+    //     console.log('edged:', edged)   
+    // }
 
     // cv.HoughLines(gray, linesTest, 1, Math.PI/180,15)
     // cv.imshow('canvasOutput51', linesTest);  
