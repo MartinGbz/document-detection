@@ -34,6 +34,12 @@ let green;
 
 let ksize;
 
+let tmp;
+let cnt;
+
+let perimCurCtr;
+let perimBigCtr;
+
 // imgElement.onload = function() {
 //     globalProcess(src);
 // }
@@ -154,12 +160,10 @@ function drawAllContours() {
 function createConvexHulls() {
     hull = new cv.MatVector();
     for (let i = 0; i < contours.size(); ++i) {
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
+        cnt = contours.get(i);
         cv.convexHull(cnt, tmp, false, true);
 
         hull.push_back(tmp);
-        cnt.delete(); tmp.delete();
     }
     hull.delete();
 }
@@ -167,12 +171,13 @@ function createConvexHulls() {
 // Draw all hulls + the bigest hull alone on the image
 function findLargestContourAndHull() {
     // get first contours from contours array
+    console.log('contours:', contours.size())
     contourSelected = contours.get(0).clone(); 
     // explore contours and draw all of them on the img
     // fins the bigest contour
     for (let i = 0; i < contours.size(); ++i) {
-        let perimCurCtr = cv.arcLength(contours.get(i), false);
-        let perimBigCtr = cv.arcLength(contourSelected, false);
+        perimCurCtr = cv.arcLength(contours.get(i), false);
+        perimBigCtr = cv.arcLength(contourSelected, false);
         // let areaCurCtr = cv.contourArea(contours.get(i), false);
         // let areaBigCtr = cv.contourArea(contours.get(i), false);
 
@@ -208,6 +213,7 @@ function findLargestContourAndHull() {
     //     // console.log('deleted')
     // }
     hull2 = new cv.MatVector();
+    // hull2.create();
     cv.convexHull(contourSelected, biggestContourHulled, true, true);
     hull2.push_back(biggestContourHulled);
     // console.log('biggestContourHulled:', biggestContourHulled)
@@ -305,6 +311,7 @@ function setVariables() {
     biggestContourHulled = new cv.Mat()
     green = new cv.Scalar(0,255,0);
     ksize = new cv.Size(5, 5);
+    tmp = new cv.Mat();
     // hull2 = new cv.MatVector();
 }
 
