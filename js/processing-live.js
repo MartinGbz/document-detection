@@ -23,12 +23,16 @@ let contours;
 let hierarchy;
 
 let hull;
-// let hull2;
+let hull2;
 
 let contourSelected;
 
 let width = 1008;
 let height = 756;
+
+let green;
+
+let ksize;
 
 // imgElement.onload = function() {
 //     globalProcess(src);
@@ -62,6 +66,9 @@ function globalProcess(src) {
     // img.delete();
 
     // img2 is created but when I returned it, the app crashed
+
+    contours.delete();
+
     return img2;
 }
 
@@ -106,7 +113,6 @@ function filtersProcess(src) {
 
 
     // let ksize = new cv.Size(17, 17);
-    let ksize = new cv.Size(5, 5);
     // let ksize = new cv.Size(29, 29);
     // let ksize = new cv.Size(11, 11);
     
@@ -155,6 +161,7 @@ function createConvexHulls() {
         hull.push_back(tmp);
         cnt.delete(); tmp.delete();
     }
+    hull.delete();
 }
 
 // Draw all hulls + the bigest hull alone on the image
@@ -177,13 +184,34 @@ function findLargestContourAndHull() {
     // console.log(cv.arcLength(contourSelected, false))
 
     // crete a empty MatVector and put the bigest contour in it
-    let green = new cv.Scalar(0,255,0);
     
     // Draw the bigest contour hulled on the idcard
-    let hull2 = new cv.MatVector();
+    // hull2 = new cv.MatVector();
     // biggestContourHulled = new cv.Mat()
+    // let testa = new cv.MatVector();
+    // let testb = new cv.MatVector();
+    // testa.push_back(new cv.Mat());
+    // testa.push_back(new cv.Mat());
+    // testb.push_back(new cv.Mat());
+    // testb.push_back(new cv.Mat());
+    // for (let i = 0; i < testb.size(); i++) {
+    //     testb.get(i).delete();
+    //     console.log('deleted')
+    // }
+    // console.log('testa:', testa)
+    // console.log('testa:', testa.length)
+    // console.log('testb:', testb)
+    // console.log('testb:', testb.length)
+    // hull2.delete();
+    // for (let i = 0; i < hull2.size(); i++) {
+    //     hull2.get(i).delete();
+    //     // console.log('deleted')
+    // }
+    hull2 = new cv.MatVector();
     cv.convexHull(contourSelected, biggestContourHulled, true, true);
     hull2.push_back(biggestContourHulled);
+    // console.log('biggestContourHulled:', biggestContourHulled)
+    // console.log('hull2:', hull2)
     cv.drawContours(img2, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
     // the line below causes a crash
     // aka: 6480688 - Exception catching is disabled, this exception cannot be caught. Compile with -s DISABLE_EXCEPTION_CATCHING=0 or DISABLE_EXCEPTION_CATCHING=2 to catch.
@@ -275,6 +303,8 @@ function setVariables() {
     hierarchy = new cv.Mat();
     img = new cv.Mat();
     biggestContourHulled = new cv.Mat()
+    green = new cv.Scalar(0,255,0);
+    ksize = new cv.Size(5, 5);
     // hull2 = new cv.MatVector();
 }
 
