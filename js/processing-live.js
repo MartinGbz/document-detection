@@ -23,6 +23,7 @@ let contours;
 let hierarchy;
 
 let hull;
+// let hull2;
 
 let contourSelected;
 
@@ -38,24 +39,30 @@ function globalProcess(src) {
     src = filtersProcess(src);
 
     // find contours
-    // contours = new cv.MatVector();
+    contours = new cv.MatVector();
     // hierarchy = new cv.Mat();
-    // cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
     // // show all contours found
     // drawAllContours();
 
     // Create convex hulls from different contours
-    // createConvexHulls();
+    createConvexHulls();
 
     // // Draw all hulls + draw the bigest hull
-    // if(contours.get(0)) {
-    //     findLargestContourAndHull();
-    // }
+    if(contours.get(0)) {
+        findLargestContourAndHull(); 
+        // biggestContourHulled.delete();
+    }
 
     // findCorners();
+    // finalDst.delete();
 
-    return src;
+    // hierarchy.delete();
+    // img.delete();
+
+    // img2 is created but when I returned it, the app crashed
+    return img2;
 }
 
 function filtersProcess(src) {
@@ -63,13 +70,14 @@ function filtersProcess(src) {
     // cv.imshow('canvasOutput', src);
 
     // variablesglobales
-    gray = new cv.Mat();
-    bilateral = new cv.Mat();
-    eq = new cv.Mat();
-    edged = new cv.Mat();
     // linesTest = new cv.Mat();
     // srcResized = new cv.Mat();
-    img = new cv.Mat();
+
+    // if(img) {
+    //     img.delete();
+    // }
+
+    // img = new cv.Mat();
 
     // img size wanted
     // let dsize = new cv.Size(width, height);
@@ -79,47 +87,45 @@ function filtersProcess(src) {
     //cv.imshow('canvasOutput2', srcResized);
 
     // RGB to BGR
-    // cv.cvtColor(srcResized, img, cv.COLOR_RGB2BGR)
-    //cv.imshow('canvasOutput3', img);
+    cv.cvtColor(src, img, cv.COLOR_RGB2BGR)
+    // cv.imshow('canvasOutput3', img);
 
     img2 = img.clone();
     img3 = img.clone();
     img4 = img.clone();
 
     // BGR to GRAY levels
-    // cv.cvtColor(img, gray, cv.COLOR_BGR2GRAY)
-    //cv.imshow('canvasOutput4', gray);
+    cv.cvtColor(img, img, cv.COLOR_BGR2GRAY)
+    // cv.imshow('canvasOutput4', gray);
 
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+    // cv.cvtColor(src, img, cv.COLOR_RGBA2GRAY);
 
     // Billateral filter
     // cv.bilateralFilter(gray, bilateral, 5, 5, 5, cv.BORDER_CONSTANT)
     // cv.imshow('canvasOutput5', bilateral);
 
 
-    test1 = new cv.Mat();
-
     // let ksize = new cv.Size(17, 17);
-    // let ksize = new cv.Size(5, 5);
-    let ksize = new cv.Size(29, 29);
+    let ksize = new cv.Size(5, 5);
+    // let ksize = new cv.Size(29, 29);
     // let ksize = new cv.Size(11, 11);
     
-    cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
+    cv.GaussianBlur(img, img, ksize, 0, 0, cv.BORDER_DEFAULT)
 
 
 
     // ----------------------------------------
 
     // Equalize histoigram
-    cv.equalizeHist(test1, eq)
+    cv.equalizeHist(img, img)
     //cv.imshow('canvasOutput6', eq);
 
     // Canny filter
     // cv.Canny(gray, edged, 200, 250)
-    cv.Canny(eq, edged, 75, 200)
+    cv.Canny(img, img, 75, 200)
     //cv.imshow('canvasOutput7', edged);
 
-    return edged
+    return img
 
     // cv.HoughLines(gray, linesTest, 1, Math.PI/180,15)
     // cv.imshow('canvasOutput51', linesTest);  
@@ -174,12 +180,17 @@ function findLargestContourAndHull() {
     let green = new cv.Scalar(0,255,0);
     
     // Draw the bigest contour hulled on the idcard
-    let hull = new cv.MatVector();
-    biggestContourHulled = new cv.Mat()
+    let hull2 = new cv.MatVector();
+    // biggestContourHulled = new cv.Mat()
     cv.convexHull(contourSelected, biggestContourHulled, true, true);
-    hull.push_back(biggestContourHulled);
-    cv.drawContours(img2, hull, 0, green, 5, cv.LINE_8, hierarchy, 0);
+    hull2.push_back(biggestContourHulled);
+    cv.drawContours(img2, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
+    // the line below causes a crash
+    // aka: 6480688 - Exception catching is disabled, this exception cannot be caught. Compile with -s DISABLE_EXCEPTION_CATCHING=0 or DISABLE_EXCEPTION_CATCHING=2 to catch.
     cv.cvtColor(img2, img2, cv.COLOR_BGR2RGB, 0);
+
+    hull2.delete();
+    // biggestContourHulled.delete();
 }
 
 function findCorners(){
@@ -203,6 +214,8 @@ function findCorners(){
         console.log('No 4-corner large contour!');
         return;
     }
+
+    approx.delete();
 
     //Find the corners
     //foundCountour has 2 channels (seemingly x/y), has a depth of 4, and a type of 12.  Seems to show it's a CV_32S "type", so the valid data is in data32S??
@@ -254,8 +267,20 @@ function findCorners(){
     cv.warpPerspective(img4, finalDst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
     cv.cvtColor(finalDst, finalDst, cv.COLOR_BGR2RGB, 0);
     //cv.imshow('canvasOutput12', finalDst);
+
+    // biggestContourHulled.delete();
+}
+
+function setVariables() {
+    hierarchy = new cv.Mat();
+    img = new cv.Mat();
+    biggestContourHulled = new cv.Mat()
+    // hull2 = new cv.MatVector();
 }
 
 function onOpenCvReady() {
-  document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-}
+    document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+    //   startWebcam();
+    setVariables();
+    startVideo();
+  }

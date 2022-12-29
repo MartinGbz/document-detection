@@ -497,3 +497,10 @@ function findCorners3() {
 function onOpenCvReady() {
   document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
 }
+
+// function onOpenCvReady() {
+//     cv['onRuntimeInitialized']=()=>{
+//         document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+//         console.log('gang')
+//     };
+// }

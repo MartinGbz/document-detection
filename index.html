@@ -26,7 +26,7 @@
     <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
   </div>
   <div class="inputoutput">
-    <canvas id="canvasOutput" ></canvas>
+    <canvas id="canvasOutput" willReadFrequently="true"></canvas>
     <div class="caption">canvasOutput</div>
   </div>
   <div class="inputoutput" style="display: none;">
@@ -94,10 +94,27 @@
     <div class="caption">canvasOutput13</div>
   </div>
 </div>
-<script async src="js/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
-<!-- <script type="text/javascript" src="./js/processing.js"></script> -->
-<script type="text/javascript" src="./js/corners.js"></script>
+<!-- <script type="text/javascript"> 
+  var DISABLE_EXCEPTION_CATCHING = 2;
+</script> -->
+<!-- <script async src="libs/opencv.js" onload="onOpenCvReady();" type="text/javascript"> -->
+<script async src="libs/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+<!-- <script async src="libs/gang.js" onload="onOpenCvReady()" type="text/javascript">
+  // var DISABLE_EXCEPTION_CATCHING = 2;
+</script> -->
+<!-- <script>
+  function onOpenCvReady() {
+  document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+  //   startWebcam();
+  setVariables();
+  startVideo();
+}
+</script> -->
+<!-- <script type="text/javascript" src="./js/load.js"></script> -->
+<!-- <script async src="libs/opencv-catching.js" onload="onOpenCvReady();" type="text/javascript"></script> -->
+<!-- <script async src="libs/opencv-catching-2.js" onload="onOpenCvReady();" type="text/javascript"></script> -->
 <script type="text/javascript" src="./js/video.js"></script>
+<!-- <script type="text/javascript" src="./js/processing.js"></script> -->
 <script type="text/javascript" src="./js/processing-live.js"></script>
 <!-- <script type="text/javascript" src="./js/processingOriginal.js"> -->
 </script>
