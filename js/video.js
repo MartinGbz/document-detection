@@ -17,7 +17,7 @@ function startVideo() {
     
         function processVideo() {
           try {
-            const memUsedBefore = window.performance.memory['usedJSHeapSize']; //Used memory before executing processVideo (in bytes)
+            // const memUsedBefore = window.performance.memory['usedJSHeapSize']; //Used memory before executing processVideo (in bytes)
             // if (!streaming) {
             //   // clean and stop.
             //   src.delete();
@@ -34,7 +34,7 @@ function startVideo() {
             // schedule the next one.
             let delay = 1000 / FPS - (Date.now() - begin);
             //Subtract memUsedBefore from the current allocated heap size
-            const additionalMemUsed = window.performance.memory['usedJSHeapSize'] - memUsedBefore;
+            // const additionalMemUsed = window.performance.memory['usedJSHeapSize'] - memUsedBefore;
             console.log('additionalMemUsed:', additionalMemUsed)
             setTimeout(processVideo, delay);
           } catch (err) {
