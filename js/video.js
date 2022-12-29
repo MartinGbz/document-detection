@@ -35,7 +35,7 @@ function startVideo() {
             let delay = 1000 / FPS - (Date.now() - begin);
             //Subtract memUsedBefore from the current allocated heap size
             // const additionalMemUsed = window.performance.memory['usedJSHeapSize'] - memUsedBefore;
-            console.log('additionalMemUsed:', additionalMemUsed)
+            // console.log('additionalMemUsed:', additionalMemUsed)
             setTimeout(processVideo, delay);
           } catch (err) {
             console.error(err);
