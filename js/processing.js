@@ -33,14 +33,43 @@ let hull;
 
 let contourSelected;
 
-// let width = 1008;
-// let height = 756;
+
+let srcResizedOriginal;
+let imgOriginal;
+let dsizeOriginal;
+
+let resizeCoef = 1;
+
+let width;
+let height;
+
+/**
+ * Valeur à partir de laquelle on considère qu'il y a trop de contour ou non
+ */
+let resizeThreshold=1.5;
+let contourRatio;
 
 imgElement.addEventListener('load', (e) => {
-    console.log('Hauteur de l\'image:', imgElement.height);
-    console.log('Largeur de l\'image:', imgElement.width);
-    width = imgElement.width;
-    height = imgElement.height;
+    // console.log('Hauteur de l\'image:', imgElement.height);
+    // console.log('Largeur de l\'image:', imgElement.width);
+
+    // if(imgElement.width > imgElement.height){
+    //     resizeCoef=500/imgElement.height;
+    // }
+    // else {
+    //     resizeCoef=500/imgElement.width;
+    // }
+
+    // console.log('resizeCoef:', resizeCoef)
+
+    // width = imgElement.width*resizeCoef;
+    // height = imgElement.height*resizeCoef;
+
+    // console.log('height:', height);
+    // console.log('width:', width);
+
+
+
 }, false);
 
 inputElement.addEventListener('change', (e) => {
@@ -51,18 +80,53 @@ inputElement.addEventListener('change', (e) => {
     //   console.log(e);
 }, false);
 
+function resizeImage() {
+    console.log('Hauteur de l\'image:', imgElement.height);
+    console.log('Largeur de l\'image:', imgElement.width);
+
+    if(imgElement.width > imgElement.height){
+        resizeCoef=500/imgElement.height;
+    }
+    else {
+        resizeCoef=500/imgElement.width;
+    }
+
+    console.log('resizeCoef:', resizeCoef)
+
+    width = imgElement.width*resizeCoef;
+    height = imgElement.height*resizeCoef;
+
+    console.log('height:', height);
+    console.log('width:', width);
+}
+
 
 imgElement.onload = function() {
     console.log('hey');
 
+    // img read
+    src = cv.imread(imgElement)
+
+    contourRatio = getContoursRatio(src);
+    console.log('getContoursRatio:', contourRatio)
+
+    // if(contourRatio > resizeThreshold) {
+    //     resizeImage();
+    //     console.log("REEEEESSSSSIIIIIIIIIZED")
+    // }
+    // else {
+    //     resizeCoef = 1;
+    //     width = imgElement.width;
+    //     height = imgElement.height;
+    //     console.log("NOT RESIZED")
+    // }
+
+    resizeImage();
+
     // apply filters
     filtersProcess();
 
-    // find contours
-    contours = new cv.MatVector();
-    hierarchy = new cv.Mat();
-    cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    console.log('contours.size():', contours.size())
+    // manageFiltersParameters();
 
     // show all contours found
     drawAllContours();
@@ -77,8 +141,7 @@ imgElement.onload = function() {
 }
 
 function filtersProcess() {
-    // img read
-    src = cv.imread(imgElement)
+    
     // cv.imshow('canvasOutput', src);
 
     // variablesglobales
@@ -91,6 +154,17 @@ function filtersProcess() {
     img = new cv.Mat();
     blackImg = cv.Mat.zeros(img.rows, img.cols, cv.CV_8UC3);
 
+    srcResizedOriginal = new cv.Mat();
+    imgOriginal = new cv.Mat();
+    dsizeOriginal = new cv.Size(width/resizeCoef, height/resizeCoef);
+    console.log('dsizeOriginal:', dsizeOriginal)
+    //resize img
+    cv.resize(src, srcResizedOriginal, dsizeOriginal, 0, 0, cv.INTER_AREA);
+    // RGB to BGR
+    cv.cvtColor(srcResizedOriginal, imgOriginal, cv.COLOR_RGB2BGR)
+    cv.imshow('canvasOutput54', imgOriginal);
+
+    
     // img size wanted
     let dsize = new cv.Size(width, height);
 
@@ -112,77 +186,147 @@ function filtersProcess() {
     cv.cvtColor(img, gray, cv.COLOR_BGR2GRAY)
     cv.imshow('canvasOutput4', gray);
 
-    // Billateral filter
-    // cv.bilateralFilter(gray, bilateral, 5, 5, 5, cv.BORDER_CONSTANT)
-    // cv.imshow('canvasOutput5', bilateral);
-
-    // toto = new cv.Mat();
-    // titi = new cv.Mat();
-    // cv.erode(bilateral, toto, titi, new cv.Point(-1,-1), 1, cv.BORDER_CONSTANT)
-    // cv.imshow('canvasOutput51', toto);
-
-    // ----------------------------------------
-
     test1 = new cv.Mat();
+
+    test2 = new cv.Mat();
     // Billateral filter
-    // cv.bilateralFilter(gray, test1, 10, 500, 1, cv.BORDER_CONSTANT)
-    // cv.bilateralFilter(gray, test1, 9, 75, 75, cv.BORDER_CONSTANT)
-    // cv.bilateralFilter(gray, test1, 5, 5, 5, cv.BORDER_CONSTANT)
-    // cv.imshow('canvasOutput5', test1);
-
-    // cv.adaptiveThreshold(test1, test1, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 115, 4)
-    // cv.imshow('canvasOutput51', test1);
-
-    // cv.medianBlur(test1, test1, 11)
-    // cv.imshow('canvasOutput52', test1);
-
-    // cv.copyMakeBorder(test1, test1, 5, 5, 5, 5, cv.BORDER_CONSTANT, value=[0, 0, 0, 0])
-    // cv.imshow('canvasOutput53', test1);
-
-        // test2 = new cv.Mat();
-    // Billateral filter
-    // cv.bilateralFilter(gray, test2, 5, 5, 5, cv.BORDER_DEFAULT)
+    // cv.bilateralFilter(gray, test2, 25, 25, 25, cv.BORDER_DEFAULT)
     // cv.imshow('canvasOutput52', test2);
 
-    // test3 = new cv.Mat();
-    // // Billateral filter
-    // cv.bilateralFilter(gray, test3, 5, 5, 5, cv.BORDER_REFLECT)
-    // cv.imshow('canvasOutput53', test3);
 
-    // test4 = new cv.Mat();
-    // // Billateral filter
-    // cv.bilateralFilter(gray, test4, 5, 5, 5, cv.BORDER_WRAP)
-    // cv.imshow('canvasOutput54', test4);
-    
     // let ksize = new cv.Size(5, 5);
     let ksize = new cv.Size(7, 7);
-    // let ksize = new cv.Size(5, 5);
-    // let ksize = new cv.Size(29, 29);
+    // let ksize = new cv.Size(9, 9);
     // let ksize = new cv.Size(11, 11);
-    cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
-    cv.imshow('canvasOutput5', test1);
+    // let ksize = new cv.Size(15, 15);
+    // let ksize = new cv.Size(17, 17);
+    // let ksize = new cv.Size(19, 19);
+    // let ksize = new cv.Size(29, 29);
+    if(contourRatio > resizeThreshold) {
+        console.log("REEEEESSSSSIIIIIIIIIZED")
+        cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
+        cv.imshow('canvasOutput5', gray);
+    }
+    else {
+        console.log("NOT RESIZED")
+    }
+    // cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
+    // cv.imshow('canvasOutput5', test1);
 
     // Equalize histoigram
-    cv.equalizeHist(test1, eq)
-    cv.imshow('canvasOutput6', eq);
+    // cv.equalizeHist(test1, eq)
+    // cv.imshow('canvasOutput6', eq);
 
-    cv.Canny(eq, edged, 255, 0)
+    // Canny filter
+    // canny150 + gaussian77 work aproximatively on noised image BUT arase some id card contour on not noised image
+    // canny100 + gaussian77 work perfectly on noised image BUT arase some id card contour on not noised image
+    cv.Canny(gray, edged, 100, 0)
     cv.imshow('canvasOutput7', edged);
 
-    console.log('edged:', edged)   
-
-    // while(!contours || contours.size() > 200) {
-    //     // Canny filter
-    //     // cv.Canny(gray, edged, 200, 250)
-    //     cv.Canny(eq, edged, 50, 200)
-    //     cv.imshow('canvasOutput7', edged);
-
-    //     console.log('edged:', edged)   
-    // }
-
     // cv.HoughLines(gray, linesTest, 1, Math.PI/180,15)
-    // cv.imshow('canvasOutput51', linesTest);  
+    // cv.imshow('canvasOutput51', linesTest);
 
+    if(contours) {
+        contours.delete();
+    }
+    contours = new cv.MatVector();
+    hierarchy = new cv.Mat();
+    cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    console.log('---------------contours.size():', contours.size())
+    // console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
+    // console.log('canny: ', cannyThreshold[cannyThresholdIndex])
+
+}
+
+function manageFiltersParameters() {
+    let gaussianKSize = [5,7,11,29];
+    let gaussianKSizeIndex = 0;
+
+    let cannyThreshold = [0,50,100,150,200,255];
+    let cannyThresholdIndex = -1;
+
+    while(!contours || contours.size() > 100) {
+        console.log('"test":', "test")
+        cannyThresholdIndex++;
+        if(cannyThresholdIndex == 6) {
+            gaussianKSizeIndex++;
+            cannyThresholdIndex = 0;
+            console.log("hey")
+        }
+        if(cannyThresholdIndex == 7 || gaussianKSizeIndex == 5){
+            console.log("ho")
+            break;
+        }
+
+        // let ksize = new cv.Size(5, 5);
+        let ksize = new cv.Size(gaussianKSize[gaussianKSizeIndex], gaussianKSize[gaussianKSizeIndex]);
+        // let ksize = new cv.Size(29, 29);
+        // let ksize = new cv.Size(11, 11);
+        cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
+        cv.imshow('canvasOutput5', test1);
+
+        // Equalize histoigram
+        cv.equalizeHist(test1, eq)
+        cv.imshow('canvasOutput6', eq);
+
+        // Canny filter
+        cv.Canny(eq, edged, cannyThreshold[cannyThresholdIndex], 0)
+        cv.imshow('canvasOutput7', edged);
+    
+        console.log('edged:', edged)
+        
+        // find contours
+        if(contours) {
+            contours.delete();
+        }
+        contours = new cv.MatVector();
+        hierarchy = new cv.Mat();
+        cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+        console.log('---------------contours.size():', contours.size())
+        console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
+        console.log('canny: ', cannyThreshold[cannyThresholdIndex])
+        
+    }
+
+    // show all contours found
+    drawAllContours();
+
+    // Create convex hulls from different contours
+    createConvexHulls();
+
+    // Draw all hulls + draw the bigest hull
+    findLargestContourAndHull();
+
+    findCorners22();
+}
+
+/**
+ * Calcul un ratio du nombre de contour en fonction de la taille de l'image
+ * @param {*} src 
+ * @returns 
+ */
+function getContoursRatio(src) {
+    let mat = new cv.Mat();
+    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
+    cv.Canny(mat, mat, 255, 255)
+
+    let c = new cv.MatVector();
+    let h = new cv.Mat();
+    cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    console.log('AAA---------------contours.size():', c.size())
+
+    let ratio;
+    if(imgElement.width > imgElement.height){
+        ratio = c.size()/imgElement.width;
+    }
+    else {
+        ratio = c.size()/imgElement.height;
+    }
+    ratio = ratio*1;
+
+    console.log('ratio:', ratio)
+
+    return ratio;
 }
 
 function createConvexHulls() {
@@ -267,7 +411,7 @@ function drawAllContours() {
         let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
         let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
         let randomColor =  new cv.Scalar(red,green, blue);
-        cv.drawContours(img, contours, i, randomColor, 1, cv.LINE_8, hierarchy, 1);
+        cv.drawContours(img, contours, i, randomColor, 5, cv.LINE_8, hierarchy, 1);
     }
     cv.cvtColor(img, img, cv.COLOR_BGR2RGB)
     cv.imshow('canvasOutput8', img);
@@ -480,15 +624,15 @@ function findCorners22(){
     // For example, CV_8UC1 means a 8-bit single-channel array, CV_32FC2 means a 2-channel (complex) floating-point array.
     // let finalDestCoords = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, theWidth - 1, 0, theWidth - 1, theHeight - 1, 0, theHeight - 1]);
     // ?, ?, taille haut, ?, taille bas, taille droite, ?, taille gauche
-    let finalDestCoords = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, theWidth, 0, theWidth, theHeight, 0, theHeight]);
+    let finalDestCoords = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, theWidth/resizeCoef, 0, theWidth/resizeCoef, theHeight/resizeCoef, 0, theHeight/resizeCoef]);
     console.log('finalDestCoords:', finalDestCoords)
-    let srcCoords = cv.matFromArray(4, 1, cv.CV_32FC2, [tl.corner.x, tl.corner.y, tr.corner.x, tr.corner.y, br.corner.x, br.corner.y, bl.corner.x, bl.corner.y]);
-    let dsize = new cv.Size(theWidth, theHeight);
+    let srcCoords = cv.matFromArray(4, 1, cv.CV_32FC2, [tl.corner.x/resizeCoef, tl.corner.y/resizeCoef, tr.corner.x/resizeCoef, tr.corner.y/resizeCoef, br.corner.x/resizeCoef, br.corner.y/resizeCoef, bl.corner.x/resizeCoef, bl.corner.y/resizeCoef]);
+    let dsize = new cv.Size(theWidth/resizeCoef, theHeight/resizeCoef);
     // l'assemblage des coordonnées (des coins) reel de la carte sur l'image ET des dimension réel de la carte (distance entre les coorddonées)
     // permet de nous fournir un array de perspective
     let M = cv.getPerspectiveTransform(srcCoords, finalDestCoords)
     // on utilise cette array de perspective dans cette fonction, ce ui nous permet de faire l'homographie
-    cv.warpPerspective(img6, finalDst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+    cv.warpPerspective(imgOriginal, finalDst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
     cv.cvtColor(finalDst, finalDst, cv.COLOR_BGR2RGB, 0);
     cv.imshow('canvasOutput12', finalDst);
 }
