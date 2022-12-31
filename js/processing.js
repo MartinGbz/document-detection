@@ -127,6 +127,7 @@ imgElement.onload = function() {
     filtersProcess();
 
     // manageFiltersParameters();
+    // manageFiltersParameters2();
 
     // show all contours found
     drawAllContours();
@@ -300,10 +301,55 @@ function manageFiltersParameters() {
     findCorners22();
 }
 
+
+function manageFiltersParameters2() {
+    let gaussianKSize = [5,7,11,15,17,19];
+    let gaussianKSizeIndex = -1;
+
+    contourRatio = getContoursRatio2(edged)
+    console.log('contourRatio:', contourRatio)
+    console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
+
+    while(contourRatio > 20000) {
+        gaussianKSizeIndex++;
+        if(gaussianKSizeIndex == 5){
+            console.log("ho")
+            break;
+        }
+
+        // let ksize = new cv.Size(5, 5);
+        let ksize = new cv.Size(gaussianKSize[gaussianKSizeIndex], gaussianKSize[gaussianKSizeIndex]);
+        // let ksize = new cv.Size(29, 29);
+        // let ksize = new cv.Size(11, 11);
+        cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
+        cv.imshow('canvasOutput5', test1);
+
+        // Canny filter
+        cv.Canny(test1, edged, 100, 0)
+        cv.imshow('canvasOutput7', edged);
+        
+        contourRatio = getContoursRatio2(edged)
+        console.log('contourRatio:', contourRatio)
+        console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
+        
+    }
+
+    // show all contours found
+    drawAllContours();
+
+    // Create convex hulls from different contours
+    createConvexHulls();
+
+    // Draw all hulls + draw the bigest hull
+    findLargestContourAndHull();
+
+    findCorners22();
+}
+
 /**
  * Calcul un ratio du nombre de contour en fonction de la taille de l'image
  * @param {*} src 
- * @returns 
+ * @returns ratio
  */
 function getContoursRatio(src) {
     let mat = new cv.Mat();
@@ -327,6 +373,38 @@ function getContoursRatio(src) {
     console.log('ratio:', ratio)
 
     return ratio;
+}
+
+/**
+ * Calcul un ratio du nombre de contour en fonction de la taille de l'image
+ * @param {*} src 
+ * @returns ratio
+ */
+function getContoursRatio2(src) {
+    let c = new cv.MatVector();
+    let h = new cv.Mat();
+    cv.findContours(src, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    console.log('AAA---------------contours.size():', c.size())
+    let perim = 0;
+
+    for (let i = 0; i < c.size(); ++i) {
+        perim = perim + cv.arcLength(c.get(i), false);
+    }
+
+    // let ratio;
+    // if(imgElement.width > imgElement.height){
+    //     ratio = perim/imgElement.width;
+    // }
+    // else {
+    //     ratio = perim/imgElement.height;
+    // }
+    // ratio = ratio*1;
+
+
+    // console.log('ratio:', ratio)
+    console.log('perim:', perim)
+
+    return perim;
 }
 
 function createConvexHulls() {
