@@ -15,15 +15,11 @@ let srcResized;
 let img;
 let biggestContourHulled;
 
-// black image with the same size than img
-let blackImg;
-
 // clone img
 let img2;
 let img3;
 let img4;
 let img5;
-let img6;
 
 // contours
 let contours;
@@ -46,7 +42,7 @@ let height;
 /**
  * Valeur à partir de laquelle on considère qu'il y a trop de contour ou non
  */
-let resizeThreshold=1.5;
+let contourRatioThreshold=1.5;
 let contourRatio;
 
 imgElement.addEventListener('load', (e) => {
@@ -81,8 +77,8 @@ inputElement.addEventListener('change', (e) => {
 }, false);
 
 function resizeImage() {
-    console.log('Hauteur de l\'image:', imgElement.height);
-    console.log('Largeur de l\'image:', imgElement.width);
+    console.log('original height', imgElement.height);
+    console.log('original width', imgElement.width);
 
     if(imgElement.width > imgElement.height){
         resizeCoef=500/imgElement.height;
@@ -96,12 +92,19 @@ function resizeImage() {
     width = imgElement.width*resizeCoef;
     height = imgElement.height*resizeCoef;
 
-    console.log('height:', height);
-    console.log('width:', width);
+    console.log('new height:', height);
+    console.log('new width:', width);
 }
 
 
 imgElement.onload = function() {
+    globalProcessBasic();
+    // globalProcessAlgo1();
+    // globalProcessAlgo2();
+    // globalProcessBasicPerim();
+}
+
+function globalProcessBasic() {
     console.log('hey');
 
     // img read
@@ -110,24 +113,12 @@ imgElement.onload = function() {
     contourRatio = getContoursRatio(src);
     console.log('getContoursRatio:', contourRatio)
 
-    // if(contourRatio > resizeThreshold) {
-    //     resizeImage();
-    //     console.log("REEEEESSSSSIIIIIIIIIZED")
-    // }
-    // else {
-    //     resizeCoef = 1;
-    //     width = imgElement.width;
-    //     height = imgElement.height;
-    //     console.log("NOT RESIZED")
-    // }
-
     resizeImage();
+
+    filterPreProcess();
 
     // apply filters
     filtersProcess();
-
-    // manageFiltersParameters();
-    // manageFiltersParameters2();
 
     // show all contours found
     drawAllContours();
@@ -138,32 +129,98 @@ imgElement.onload = function() {
     // Draw all hulls + draw the bigest hull
     findLargestContourAndHull();
 
-    findCorners22();
+    findCorners();
 }
 
-function filtersProcess() {
-    
-    // cv.imshow('canvasOutput', src);
 
-    // variablesglobales
+/**
+ * Pareil que global process basic mais avec le calcul du contour raio avec les périmètres
+ */
+function globalProcessBasicPerim() {
+    console.log('hey');
+
+    // img read
+    src = cv.imread(imgElement)
+
+    let mat = new cv.Mat();
+    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
+    cv.Canny(mat, mat, 255, 255)
+    contourRatio = getContoursRatio2(mat);
+    console.log('getContoursRatio:', contourRatio)
+
+    resizeImage();
+
+    filterPreProcess();
+    // apply filters
+    filtersProcess();
+
+    // show all contours found
+    drawAllContours();
+
+    // Create convex hulls from different contours
+    createConvexHulls();
+
+    // Draw all hulls + draw the bigest hull
+    findLargestContourAndHull();
+
+    findCorners();
+}
+
+/**
+ * modification canny + gaussian blur
+ * Utilise le nombre de contours
+ */
+function globalProcessAlgo1() {
+    src = cv.imread(imgElement)
+
+    resizeImage();
+
+    filterPreProcess();
+    // apply filters
+    filtersProcess();
+
+    manageFiltersParameters();
+    // manageFiltersParameters2();
+}
+
+/**
+ * modification gaussian blur uniquement
+ * Utilise le contour ratio (calculer à partir du périmètre)
+ */
+function globalProcessAlgo2() {
+    src = cv.imread(imgElement)
+
+    let mat = new cv.Mat();
+    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
+    cv.Canny(mat, mat, 255, 255)
+    contourRatio = getContoursRatio2(mat)
+    console.log('contourRatio:', contourRatio)
+
+    resizeImage();
+
+    filterPreProcess();
+    // apply filters
+    filtersProcess();
+
+    manageFiltersParameters2();
+}
+
+function filterPreProcess() {
     gray = new cv.Mat();
     bilateral = new cv.Mat();
     eq = new cv.Mat();
     edged = new cv.Mat();
-    linesTest = new cv.Mat();
     srcResized = new cv.Mat();
     img = new cv.Mat();
-    blackImg = cv.Mat.zeros(img.rows, img.cols, cv.CV_8UC3);
 
     srcResizedOriginal = new cv.Mat();
     imgOriginal = new cv.Mat();
     dsizeOriginal = new cv.Size(width/resizeCoef, height/resizeCoef);
-    console.log('dsizeOriginal:', dsizeOriginal)
     //resize img
     cv.resize(src, srcResizedOriginal, dsizeOriginal, 0, 0, cv.INTER_AREA);
     // RGB to BGR
     cv.cvtColor(srcResizedOriginal, imgOriginal, cv.COLOR_RGB2BGR)
-    cv.imshow('canvasOutput54', imgOriginal);
+    // cv.imshow('canvasOutput54', imgOriginal);
 
     
     // img size wanted
@@ -181,51 +238,31 @@ function filtersProcess() {
     img3 = img.clone();
     img4 = img.clone();
     img5 = img.clone();
-    img6 = img.clone();
 
     // BGR to GRAY levels
     cv.cvtColor(img, gray, cv.COLOR_BGR2GRAY)
     cv.imshow('canvasOutput4', gray);
+}
 
+function filtersProcess() {
     test1 = new cv.Mat();
 
-    test2 = new cv.Mat();
     // Billateral filter
     // cv.bilateralFilter(gray, test2, 25, 25, 25, cv.BORDER_DEFAULT)
     // cv.imshow('canvasOutput52', test2);
 
 
-    // let ksize = new cv.Size(5, 5);
     let ksize = new cv.Size(7, 7);
-    // let ksize = new cv.Size(9, 9);
-    // let ksize = new cv.Size(11, 11);
-    // let ksize = new cv.Size(15, 15);
-    // let ksize = new cv.Size(17, 17);
-    // let ksize = new cv.Size(19, 19);
-    // let ksize = new cv.Size(29, 29);
-    if(contourRatio > resizeThreshold) {
-        console.log("REEEEESSSSSIIIIIIIIIZED")
+    if(contourRatio > contourRatioThreshold) {
         cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
         cv.imshow('canvasOutput5', gray);
     }
-    else {
-        console.log("NOT RESIZED")
-    }
-    // cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
-    // cv.imshow('canvasOutput5', test1);
-
-    // Equalize histoigram
-    // cv.equalizeHist(test1, eq)
-    // cv.imshow('canvasOutput6', eq);
 
     // Canny filter
     // canny150 + gaussian77 work aproximatively on noised image BUT arase some id card contour on not noised image
     // canny100 + gaussian77 work perfectly on noised image BUT arase some id card contour on not noised image
     cv.Canny(gray, edged, 100, 0)
     cv.imshow('canvasOutput7', edged);
-
-    // cv.HoughLines(gray, linesTest, 1, Math.PI/180,15)
-    // cv.imshow('canvasOutput51', linesTest);
 
     if(contours) {
         contours.delete();
@@ -234,19 +271,21 @@ function filtersProcess() {
     hierarchy = new cv.Mat();
     cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
     console.log('---------------contours.size():', contours.size())
-    // console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
-    // console.log('canny: ', cannyThreshold[cannyThresholdIndex])
-
 }
 
+
+/**
+ * En donnant une image grise en input on determine le meilleur combo canny + gaussian blur pour avoir un nombre de contours < à un threashold défini
+ */
 function manageFiltersParameters() {
     let gaussianKSize = [5,7,11,29];
     let gaussianKSizeIndex = 0;
 
     let cannyThreshold = [0,50,100,150,200,255];
     let cannyThresholdIndex = -1;
+    const threashold = 100;
 
-    while(!contours || contours.size() > 100) {
+    while(!contours || contours.size() > threashold) {
         console.log('"test":', "test")
         cannyThresholdIndex++;
         if(cannyThresholdIndex == 6) {
@@ -259,10 +298,7 @@ function manageFiltersParameters() {
             break;
         }
 
-        // let ksize = new cv.Size(5, 5);
         let ksize = new cv.Size(gaussianKSize[gaussianKSizeIndex], gaussianKSize[gaussianKSizeIndex]);
-        // let ksize = new cv.Size(29, 29);
-        // let ksize = new cv.Size(11, 11);
         cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
         cv.imshow('canvasOutput5', test1);
 
@@ -273,8 +309,6 @@ function manageFiltersParameters() {
         // Canny filter
         cv.Canny(eq, edged, cannyThreshold[cannyThresholdIndex], 0)
         cv.imshow('canvasOutput7', edged);
-    
-        console.log('edged:', edged)
         
         // find contours
         if(contours) {
@@ -298,19 +332,23 @@ function manageFiltersParameters() {
     // Draw all hulls + draw the bigest hull
     findLargestContourAndHull();
 
-    findCorners22();
+    findCorners();
 }
 
-
+/**
+ * Pareil que manageFiltersParameters2 sauf que la on fait varier que le gaussian. Le canny lui reste à 100
+ * Le ratio de contours ce caulcul via les perimettre des tous les contours.
+ * Les contours sont récupérer à partir du canny
+ */
 function manageFiltersParameters2() {
     let gaussianKSize = [5,7,11,15,17,19];
     let gaussianKSizeIndex = -1;
 
-    contourRatio = getContoursRatio2(edged)
-    console.log('contourRatio:', contourRatio)
-    console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
+    const threashold = 20000;
 
-    while(contourRatio > 20000) {
+    console.log('contourRatio:', contourRatio)
+
+    while(contourRatio > threashold) {
         gaussianKSizeIndex++;
         if(gaussianKSizeIndex == 5){
             console.log("ho")
@@ -334,6 +372,8 @@ function manageFiltersParameters2() {
         
     }
 
+    
+
     // show all contours found
     drawAllContours();
 
@@ -343,7 +383,7 @@ function manageFiltersParameters2() {
     // Draw all hulls + draw the bigest hull
     findLargestContourAndHull();
 
-    findCorners22();
+    findCorners();
 }
 
 /**
@@ -368,7 +408,6 @@ function getContoursRatio(src) {
     else {
         ratio = c.size()/imgElement.height;
     }
-    ratio = ratio*1;
 
     console.log('ratio:', ratio)
 
@@ -376,7 +415,7 @@ function getContoursRatio(src) {
 }
 
 /**
- * Calcul un ratio du nombre de contour en fonction de la taille de l'image
+ * Calcul un ratio des périmètres des contours en fonction de la taille de l'image
  * @param {*} src 
  * @returns ratio
  */
@@ -391,18 +430,7 @@ function getContoursRatio2(src) {
         perim = perim + cv.arcLength(c.get(i), false);
     }
 
-    // let ratio;
-    // if(imgElement.width > imgElement.height){
-    //     ratio = perim/imgElement.width;
-    // }
-    // else {
-    //     ratio = perim/imgElement.height;
-    // }
-    // ratio = ratio*1;
-
-
-    // console.log('ratio:', ratio)
-    console.log('perim:', perim)
+    // console.log('perim:', perim)
 
     return perim;
 }
@@ -495,153 +523,11 @@ function drawAllContours() {
     cv.imshow('canvasOutput8', img);
 }
 
-function findCorners() {
-    console.log(biggestContourHulled.data32S);
-    
-    let array = new Array();
-    
-    for(let i=0; i<biggestContourHulled.data32S.length; i+=2){
-        array.push({x:biggestContourHulled.data32S[i], y:biggestContourHulled.data32S[i+1]});
-    }
-    console.log(array);
-    
-    let c1 = getMinXMinY(array);
-    let c2 = getMaxXMinY(array);
-    
-    let c3 = getMinXMaxY(array);
-    let c4 = getMaxXMaxY(array);
-
-    console.log('c1');
-    console.log(c1);
-    console.log('c2');
-    console.log(c2);
-    console.log('c3');
-    console.log(c3);
-    console.log('c4');
-    console.log(c4);
-
-    let bottomLeft = new cv.Point(c1[0].x, c1[0].y);
-    let topLeft = new cv.Point(c2[0].x, c2[0].y);
-    let bottomRight =new cv.Point(c3[0].x, c3[0].y);
-    let topRight = new cv.Point(c4[0].x, c4[0].y);
-
-    console.log(bottomRight.x);
-
-    let widthA = Math.sqrt(Math.pow((bottomRight.x-bottomLeft.x), 2) + Math.pow((bottomRight.y - bottomLeft.y) , 2));
-    let widthB = Math.sqrt(Math.pow((topRight.x - topLeft.x) , 2) + Math.pow((topRight.y -topLeft.y) , 2));
-    //# compute the height of the new image
-    let heightA = Math.sqrt(Math.pow((topRight.x - bottomRight.x) , 2) + Math.pow((topRight.y - bottomRight.y),2));
-    let heightB = Math.sqrt(Math.pow((topLeft.x - bottomLeft.x) , 2) + Math.pow((topLeft.y - bottomLeft.y) , 2));
-
-    console.log(widthA);
-    console.log(widthB);
-    console.log(heightA);
-    console.log(heightB);
-
-    let maxWidth = Math.max(parseInt(widthA), parseInt(widthB));
-    let maxHeight = Math.max(parseInt(heightA), parseInt(heightB));
-
-    console.log(maxHeight);
-    console.log(maxWidth);
-
-    let srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [topLeft.x, topLeft.y, topRight.x, topRight.y, bottomLeft.x, bottomLeft.y,bottomRight.x, bottomRight.y]);
-    let dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, maxWidth-1, 0, 0, maxWidth-1, maxHeight-1, maxHeight-1]);
-    let M2 = cv.getPerspectiveTransform(srcTri, dstTri);
-
-    let finalDst2 = new cv.Mat();
-    let dsize3 = new cv.Size(maxWidth, maxHeight);
-
-    cv.warpPerspective(img6, finalDst2, M2, dsize3, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
-    cv.cvtColor(finalDst2, finalDst2, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput12', finalDst2);
-
-    let dsize4 = new cv.Size(maxWidth*2,maxHeight*2);
-    cv.resize(finalDst2, finalDst2, dsize4, 0, 0, cv.INTER_AREA);
-    cv.imshow('canvasOutput13', finalDst2);
-}
-
-function findCorners2(){    
-    let foundContour = new cv.MatVector();
-  
-    //Get area for all contours so we can find the biggest
-    let sortableContours = [];
-    for (let i = 0; i < hull.size(); i++) {
-      let cnt = hull.get(i);
-      let area = cv.contourArea(cnt, false);
-      let perim = cv.arcLength(cnt, false);
-  
-      let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-      let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-      let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-      let color = new cv.Scalar(red, green, blue);
-  
-      sortableContours.push({ areaSize: area, perimiterSize: perim, contour: cnt, color: color  });
-    }
-
-    console.log(sortableContours);
-
-    //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
-    let approx = new cv.Mat();
-    cv.approxPolyDP(sortableContours[65].contour, approx, 0.005, true);
-  
-    if (approx.rows >= 4) {
-      console.log('Found a 4-corner approx');
-      foundContour = approx;
-    }
-    else{
-      console.log('No 4-corner large contour!');
-      return;
-    }
-  
-    //Find the corners
-    let corner1 = new cv.Point(foundContour.data32S[0], foundContour.data32S[1]);
-    let corner2 = new cv.Point(foundContour.data32S[2], foundContour.data32S[3]);
-    let corner3 = new cv.Point(foundContour.data32S[4], foundContour.data32S[5]);
-    let corner4 = new cv.Point(foundContour.data32S[6], foundContour.data32S[7]);
-  
-    console.log(corner1);
-    console.log(corner2);
-    console.log(corner3);
-    console.log(corner4);
-  
-    //Order the corners
-    let cornerArray = new cv.MatVector();
-    cornerArray = [{ corner: corner1 }, { corner: corner2 }, { corner: corner3 }, { corner: corner4 }];
-    //Sort by Y position (to get top-down)
-    cornerArray.sort((item1, item2) => { 
-      return (item1.corner.y < item2.corner.y) ? -1 : (item1.corner.y > item2.corner.y) ? 1 : 0; 
-    }).slice(0, 5);
-    
-    console.log(cornerArray);
-  
-    // for (c of cornerArray) {
-    //   cv.drawContours(img6, c.corner, -1, c.color, 1, cv.LINE_8, hierarchy, 100);
-    // }
-    // cv.drawContours(img6, cornerArray, -1, new cv.Scalar(0,255,0), 1, cv.LINE_8, hierarchy, 100);
-  
-    cv.imshow('canvasOutput12', img6);
-}
-
-function findCorners22(){
-    
-    // STEP already done before
-    // //Get area for all contours so we can find the biggest
-    // let sortableContours = [];
-    // for (let i = 0; i < contours.size(); i++) {
-    //     let cnt = contours.get(i);
-    //     let area = cv.contourArea(cnt, false);
-    //     let perim = cv.arcLength(cnt, false);
-        
-    //     sortableContours.push({ areaSize: area, perimiterSize: perim, contour: cnt });
-    // }
-
-    // //Sort 'em
-    // sortableContours = sortableContours.sort((item1, item2) => { return (item1.areaSize > item2.areaSize) ? -1 : (item1.areaSize < item2.areaSize) ? 1 : 0; }).slice(0, 5);
-
-    // console.log('cv.arcLength(contourSelected, false):', cv.arcLength(contourSelected, false))
-    // console.log('sortableContours[0].perimiterSize:', sortableContours[0].perimiterSize)
-    // console.log('cv.arcLength(biggestContourHulled, false):', cv.arcLength(biggestContourHulled, false))
-
+/**
+ * Trouve les coins de la CNI et crop + homogrpahie et produit donc une image de la CNI rognée
+ * @returns 
+ */
+function findCorners(){
     //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
     let approx = new cv.Mat();
     cv.approxPolyDP(biggestContourHulled, approx, .05 * cv.arcLength(biggestContourHulled, false), true);
@@ -715,33 +601,6 @@ function findCorners22(){
     cv.imshow('canvasOutput12', finalDst);
 }
 
-function findCorners3() {
-    let poly = new cv.MatVector();
-    // approximates each contour to polygon
-    for (let i = 0; i < contours.size(); ++i) {
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
-        // You can try more different parameters
-        cv.approxPolyDP(cnt, tmp, 3, true);
-        poly.push_back(tmp);
-        cnt.delete(); tmp.delete();
-    }
-    // draw contours with random Scalar
-    for (let i = 0; i < contours.size(); ++i) {
-        let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),
-                                Math.round(Math.random() * 255));
-        cv.drawContours(img6, poly, i, color, 1, 8, hierarchy, 0);
-    }
-    cv.imshow('canvasOutput12', img6);
-}
-
 function onOpenCvReady() {
   document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
 }
-
-// function onOpenCvReady() {
-//     cv['onRuntimeInitialized']=()=>{
-//         document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-//         console.log('gang')
-//     };
-// }
