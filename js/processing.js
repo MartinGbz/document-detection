@@ -104,7 +104,8 @@ function resizeImage() {
 
 
 imgElement.onload = function() {
-    globalProcessBasic();
+    // globalProcessBasic();
+    globalProcessBasicRect();
     // globalProcessAlgo1();
     // globalProcessAlgo2();
     // globalProcessBasicPerim();
@@ -130,14 +131,43 @@ function globalProcessBasic() {
     drawAllContours();
 
     // Create convex hulls from different contours
-    // createConvexHulls();
-    createTest();
+    createConvexHulls();
 
     // Draw all hulls + draw the bigest hull
     findLargestContourAndHull();
 
     findCorners();
 }
+
+
+function globalProcessBasicRect() {
+    console.log('hey');
+
+    // img read
+    src = cv.imread(imgElement)
+
+    contourRatio = getContoursRatio(src);
+    console.log('getContoursRatio:', contourRatio)
+
+    resizeImage();
+
+    filterPreProcess();
+
+    // apply filters
+    filtersProcess();
+
+    // show all contours found
+    drawAllContours();
+
+    // Create convex hulls from different contours
+    createTest();
+
+    // Draw all hulls + draw the bigest hull
+    findLargestContourAndHullRect();
+
+    findCorners();
+}
+
 
 
 /**
@@ -259,7 +289,7 @@ function filtersProcess() {
     // cv.imshow('canvasOutput52', test2);
 
 
-    let ksize = new cv.Size(7, 7);
+    let ksize = new cv.Size(5, 5);
     if(contourRatio > contourRatioThreshold) {
         cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
         cv.imshow('canvasOutput5', gray);
@@ -268,6 +298,7 @@ function filtersProcess() {
     // Canny filter
     // canny150 + gaussian77 work aproximatively on noised image BUT arase some id card contour on not noised image
     // canny100 + gaussian77 work perfectly on noised image BUT arase some id card contour on not noised image
+    // cv.Canny(gray, edged, 100, 0)
     cv.Canny(gray, edged, 100, 0)
     cv.imshow('canvasOutput7', edged);
 
@@ -568,6 +599,92 @@ function findLargestContourAndHull() {
     cv.imshow('canvasOutput10', img5);
 }
 
+// Draw all hulls + the bigest hull alone on the image
+function findLargestContourAndHullRect() {
+    // get first contours from contours array
+    contourSelected = contours.get(0).clone(); 
+
+    // explore contours and draw all of them on the img
+    // fins the bigest contour
+    for (let i = 0; i < contours.size(); ++i) {
+        if( testAprox(contours.get(i)) ) {
+            let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
+            let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
+            let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
+
+            let color =  new cv.Scalar(red,green, blue);  
+
+            let contour_poly = new cv.Mat();
+            cv.approxPolyDP(contours.get(i), contour_poly, 3, true);
+            contours_poly.push_back(contour_poly);
+            let rect = cv.boundingRect(contour_poly);
+            boundRect.push_back(rect);
+            contour_poly.delete();
+
+            let contour_pol2 = new cv.Mat();
+            cv.approxPolyDP(contourSelected, contour_pol2, 3, true);
+            contours_poly.push_back(contour_pol2);
+            let rect2 = cv.boundingRect(contour_pol2);
+            boundRect.push_back(rect);
+            contour_pol2.delete();
+
+            let perimCurCtr = rect.width*rect.height;
+            let perimBigCtr = rect2.width*rect2.height;
+            // let areaCurCtr = cv.contourArea(contours.get(i), false);
+            // let areaBigCtr = cv.contourArea(contours.get(i), false);
+
+            if(perimCurCtr >= perimBigCtr){
+                contourSelected=contours.get(i).clone();
+            }
+
+            // console.log(boundRect.get(i))
+            
+            // cv.drawContours(img3, contours_poly, i, color, 1, cv.LINE_8, hierarchy, 0);
+            
+            // let rect = new cv.Rect(boundRect.get(i).x, boundRect.get(i).y, boundRect.get(i).width, boundRect.get(i).height);
+            // cv.rectangle(img3, rect.tl(), rect.br(), color, 2);
+            let topLeft = new cv.Point(boundRect.get(i).x, boundRect.get(i).y);
+            let bottomRight = new cv.Point(boundRect.get(i).x + boundRect.get(i).width, boundRect.get(i).y + boundRect.get(i).height);
+            cv.rectangle(img3, topLeft, bottomRight, color, 2);
+        }
+    }
+
+    console.log("contourSelected")
+    console.log(cv.arcLength(contourSelected, false))
+
+    cv.cvtColor(img3, img3, cv.COLOR_BGR2RGB)
+    cv.imshow('canvasOutput9', img3);
+
+    // crete a empty MatVector and put the bigest contour in it
+    let green = new cv.Scalar(0,255,0);
+    let contourVec = new cv.MatVector();
+    contourVec.push_back(contourSelected);
+    
+    // Draw the bigest contour on the image
+    // cv.drawContours(img4, contourVec, 0, green, 1, cv.LINE_8, hierarchy, 0);
+    // cv.cvtColor(img4, img4, cv.COLOR_BGR2RGB)
+    // cv.imshow('canvasOutput10', img4);
+
+    // let contour_poly = new cv.Mat();
+    // cv.approxPolyDP(contourSelected, contour_poly, 3, true);
+    // contours_poly.push_back(contour_poly);
+
+    // let rect = cv.boundingRect(contour_poly);
+    // boundRect.push_back(rect);
+
+    // Draw the bigest contour hulled on the idcard
+    let hull2 = new cv.MatVector();
+    biggestContourHulled = new cv.Mat()
+    // cv.convexHull(contourSelected, biggestContourHulled, true, true);
+    cv.approxPolyDP(contourSelected, biggestContourHulled, 3, true);
+    hull2.push_back(biggestContourHulled);
+
+    cv.drawContours(img5, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
+    cv.cvtColor(img5, img5, cv.COLOR_BGR2RGB, 0);
+    cv.imshow('canvasOutput10', img5);
+}
+
+
 // Draw all contours found on the image
 function drawAllContours() {
     for (let i = 0; i < contours.size(); ++i) {
@@ -581,6 +698,22 @@ function drawAllContours() {
     cv.imshow('canvasOutput8', img);
 }
 
+function testAprox(biggestContour) {
+    //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
+    let approx = new cv.Mat();
+    // cv.approxPolyDP(biggestContour, approx, .05 * cv.arcLength(biggestContour, false), true);
+    cv.approxPolyDP(biggestContour, approx, 50, true);
+
+    if (approx.rows == 4) {
+        console.log('Found a 4-corner approx');
+        return true;
+    }
+    else{
+        console.log('No 4-corner large contour!');
+        return false;
+    }
+}
+
 /**
  * Trouve les coins de la CNI et crop + homogrpahie et produit donc une image de la CNI rognée
  * @returns 
@@ -588,7 +721,8 @@ function drawAllContours() {
 function findCorners(){
     //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
     let approx = new cv.Mat();
-    cv.approxPolyDP(biggestContourHulled, approx, .05 * cv.arcLength(biggestContourHulled, false), true);
+    // cv.approxPolyDP(biggestContourHulled, approx, .05 * cv.arcLength(biggestContourHulled, false), true);
+    cv.approxPolyDP(contourSelected, approx, 50, true);
 
     let green = new cv.Scalar(0,0,255);
     let contourVec = new cv.MatVector();
