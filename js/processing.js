@@ -39,6 +39,12 @@ let resizeCoef = 1;
 let width;
 let height;
 
+
+let contours_poly;
+let boundRect;
+let centers;
+let radius;
+
 /**
  * Valeur à partir de laquelle on considère qu'il y a trop de contour ou non
  */
@@ -124,7 +130,8 @@ function globalProcessBasic() {
     drawAllContours();
 
     // Create convex hulls from different contours
-    createConvexHulls();
+    // createConvexHulls();
+    createTest();
 
     // Draw all hulls + draw the bigest hull
     findLargestContourAndHull();
@@ -232,7 +239,7 @@ function filterPreProcess() {
 
     // RGB to BGR
     cv.cvtColor(srcResized, img, cv.COLOR_RGB2BGR)
-    cv.imshow('canvasOutput3', img);
+    // cv.imshow('canvasOutput3', img);
 
     img2 = img.clone();
     img3 = img.clone();
@@ -283,7 +290,7 @@ function manageFiltersParameters() {
 
     let cannyThreshold = [0,50,100,150,200,255];
     let cannyThresholdIndex = -1;
-    const threashold = 100;
+    const threashold = 50;
 
     while(!contours || contours.size() > threashold) {
         console.log('"test":', "test")
@@ -327,7 +334,8 @@ function manageFiltersParameters() {
     drawAllContours();
 
     // Create convex hulls from different contours
-    createConvexHulls();
+    // createConvexHulls();
+    createTest();
 
     // Draw all hulls + draw the bigest hull
     findLargestContourAndHull();
@@ -459,6 +467,46 @@ function createPoly() {
     }
 }
 
+function createTest() {
+    contours_poly = new cv.MatVector();
+    boundRect = new cv.RectVector();
+    // centers = new cv.Point2fVector();
+    radius = new cv.FloatVector();
+
+    for (let i = 0; i < contours.size(); i++) {
+        let contour = contours.get(i);
+        let contour_poly = new cv.Mat();
+        cv.approxPolyDP(contour, contour_poly, 3, true);
+        contours_poly.push_back(contour_poly);
+
+        let rect = cv.boundingRect(contour_poly);
+        boundRect.push_back(rect);
+
+        // let center = new cv.Point2f();
+        // cv.minEnclosingCircle(contour_poly, center, radius.push_back(0));
+        // centers.push_back(center);
+    }
+
+    console.log('centers:', centers)
+    console.log('boundRect:', boundRect)
+    
+    // hull = new cv.MatVector();
+    // let boundRect;
+    // let rect;
+    // let center;
+    // for (let i = 0; i < contours.size(); ++i) {
+    //     boundRect = new cv.RectVector();
+    //     rect = cv.boundingRect(hull2);
+    //     boundRect.push_back(rect);
+    //     center = new cv.Point2f();
+    //     cv.minEnclosingCircle(hull2, center, radius.push_back(0));
+    //     centers.push_back(center);
+    //     cv.drawContours(img5, hull2, i, green);
+    //     cv.rectangle(img5, boundRect.get(i).tl(), boundRect.get(i).br(), color, 2);
+    //     cv.circle(img5, centers.get(i), radius.get(i), color, 2);
+    // }
+}
+
 // Draw all hulls + the bigest hull alone on the image
 function findLargestContourAndHull() {
     // get first contours from contours array
@@ -481,7 +529,15 @@ function findLargestContourAndHull() {
             contourSelected=contours.get(i).clone();
         }
 
-       cv.drawContours(img3, hull, i, color, 1, cv.LINE_8, hierarchy, 0);
+        console.log(boundRect.get(i))
+        
+        // cv.drawContours(img3, contours_poly, i, color, 1, cv.LINE_8, hierarchy, 0);
+        
+        // let rect = new cv.Rect(boundRect.get(i).x, boundRect.get(i).y, boundRect.get(i).width, boundRect.get(i).height);
+        // cv.rectangle(img3, rect.tl(), rect.br(), color, 2);
+        let topLeft = new cv.Point(boundRect.get(i).x, boundRect.get(i).y);
+        let bottomRight = new cv.Point(boundRect.get(i).x + boundRect.get(i).width, boundRect.get(i).y + boundRect.get(i).height);
+        cv.rectangle(img3, topLeft, bottomRight, color, 2);
     }
 
     console.log("contourSelected")
@@ -496,18 +552,20 @@ function findLargestContourAndHull() {
     contourVec.push_back(contourSelected);
     
     // Draw the bigest contour on the image
-    cv.drawContours(img4, contourVec, 0, green, 1, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(img4, img4, cv.COLOR_BGR2RGB)
-    cv.imshow('canvasOutput10', img4);
+    // cv.drawContours(img4, contourVec, 0, green, 1, cv.LINE_8, hierarchy, 0);
+    // cv.cvtColor(img4, img4, cv.COLOR_BGR2RGB)
+    // cv.imshow('canvasOutput10', img4);
 
     // Draw the bigest contour hulled on the idcard
     let hull2 = new cv.MatVector();
     biggestContourHulled = new cv.Mat()
-    cv.convexHull(contourSelected, biggestContourHulled, true, true);
+    // cv.convexHull(contourSelected, biggestContourHulled, true, true);
+    cv.approxPolyDP(contourSelected, biggestContourHulled, 3, true);
     hull2.push_back(biggestContourHulled);
-    cv.drawContours(img5, hull2, 0, green, 1, cv.LINE_8, hierarchy, 0);
+
+    cv.drawContours(img5, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
     cv.cvtColor(img5, img5, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput11', img5);
+    cv.imshow('canvasOutput10', img5);
 }
 
 // Draw all contours found on the image
@@ -517,7 +575,7 @@ function drawAllContours() {
         let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
         let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
         let randomColor =  new cv.Scalar(red,green, blue);
-        cv.drawContours(img, contours, i, randomColor, 5, cv.LINE_8, hierarchy, 1);
+        cv.drawContours(img, contours, i, randomColor, 1, cv.LINE_8, hierarchy, 1);
     }
     cv.cvtColor(img, img, cv.COLOR_BGR2RGB)
     cv.imshow('canvasOutput8', img);
@@ -598,7 +656,7 @@ function findCorners(){
     // on utilise cette array de perspective dans cette fonction, ce ui nous permet de faire l'homographie
     cv.warpPerspective(imgOriginal, finalDst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
     cv.cvtColor(finalDst, finalDst, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput12', finalDst);
+    cv.imshow('canvasOutput11', finalDst);
 }
 
 function onOpenCvReady() {
