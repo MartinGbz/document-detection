@@ -1,11 +1,6 @@
 let imgElement = document.getElementById('imageSrc');
 let inputElement = document.getElementById('fileInput');
 
-
-
-//IDEA:
-// - cac-lculer le nombre de contours et en fonction de ça ça me permet de savor si je doit augementer le history equalizer ou pas
-
 // temp img definition
 let gray;
 let bilateral;
@@ -35,14 +30,11 @@ let dsizeOriginal;
 
 let resizeCoef = 1;
 
-let width;
-let height;
-
+let widthResized;
+let heightResized;
 
 let contours_poly;
 let boundRect;
-let centers;
-let radius;
 
 // Cette valeur determine si oui ou non on considère le contour comme un rectangle
 // approximation très précise du contour = épsilon petit.
@@ -67,8 +59,8 @@ function resizeImage() {
         resizeCoef=500/imgElement.width;
     }
 
-    width = imgElement.width*resizeCoef;
-    height = imgElement.height*resizeCoef;
+    widthResized = imgElement.width*resizeCoef;
+    heightResized = imgElement.height*resizeCoef;
 }
 
 
@@ -224,12 +216,12 @@ function filterPreProcess() {
     // get original image
     let srcResizedOriginal = new cv.Mat();
     imgOriginal = new cv.Mat();
-    dsizeOriginal = new cv.Size(width/resizeCoef, height/resizeCoef);
+    dsizeOriginal = new cv.Size(widthResized/resizeCoef, heightResized/resizeCoef);
     cv.resize(src, srcResizedOriginal, dsizeOriginal, 0, 0, cv.INTER_AREA);
     cv.cvtColor(srcResizedOriginal, imgOriginal, cv.COLOR_RGB2BGR)
 
     // img size wanted
-    let dsize = new cv.Size(width, height);
+    let dsize = new cv.Size(widthResized, heightResized);
 
     //resize img
     cv.resize(src, srcResized, dsize, 0, 0, cv.INTER_AREA);
@@ -467,8 +459,6 @@ function createPoly() {
 function createRect() {
     contours_poly = new cv.MatVector();
     boundRect = new cv.RectVector();
-    // centers = new cv.Point2fVector();
-    radius = new cv.FloatVector();
 
     for (let i = 0; i < contours.size(); i++) {
         let contour = contours.get(i);
