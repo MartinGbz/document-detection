@@ -29,8 +29,7 @@ let hull;
 
 let contourSelected;
 
-
-let srcResizedOriginal;
+// image original
 let imgOriginal;
 let dsizeOriginal;
 
@@ -89,6 +88,10 @@ imgElement.onload = function() {
     // globalProcessBasicPerim();
 }
 
+
+/**
+ * @brief Processus basique
+ */
 function globalProcessBasic() {
     console.log('hey');
 
@@ -118,6 +121,9 @@ function globalProcessBasic() {
 }
 
 
+/**
+ * @brief Pareil que global process basic mais avec le bounding rect (estimation de rectangle)
+ */
 function globalProcessBasicRect() {
     console.log('hey');
 
@@ -147,9 +153,8 @@ function globalProcessBasicRect() {
 }
 
 
-
 /**
- * Pareil que global process basic mais avec le calcul du contour raio avec les périmètres
+ * @brief Pareil que global process basic mais avec le calcul du contour raio avec les périmètres
  */
 function globalProcessBasicPerim() {
     console.log('hey');
@@ -181,9 +186,10 @@ function globalProcessBasicPerim() {
     findCorners();
 }
 
+
 /**
- * modification canny + gaussian blur
- * Utilise le nombre de contours
+ * @description modification canny + gaussian blur
+ * @note Utilise le nombre de contours
  */
 function globalProcessAlgo1() {
     src = cv.imread(imgElement)
@@ -198,9 +204,10 @@ function globalProcessAlgo1() {
     // manageFiltersParameters2();
 }
 
+
 /**
- * modification gaussian blur uniquement
- * Utilise le contour ratio (calculer à partir du périmètre)
+ * @description modification gaussian blur uniquement
+ * @note Utilise le contour ratio (calculer à partir du périmètre)
  */
 function globalProcessAlgo2() {
     src = cv.imread(imgElement)
@@ -220,6 +227,11 @@ function globalProcessAlgo2() {
     manageFiltersParameters2();
 }
 
+
+/**
+ * @brief Reformat image and finally create a gray image
+ * @description Process to run before applying filters
+ */
 function filterPreProcess() {
     gray = new cv.Mat();
     bilateral = new cv.Mat();
@@ -228,16 +240,13 @@ function filterPreProcess() {
     srcResized = new cv.Mat();
     img = new cv.Mat();
 
-    srcResizedOriginal = new cv.Mat();
+    // get original image
+    let srcResizedOriginal = new cv.Mat();
     imgOriginal = new cv.Mat();
     dsizeOriginal = new cv.Size(width/resizeCoef, height/resizeCoef);
-    //resize img
     cv.resize(src, srcResizedOriginal, dsizeOriginal, 0, 0, cv.INTER_AREA);
-    // RGB to BGR
     cv.cvtColor(srcResizedOriginal, imgOriginal, cv.COLOR_RGB2BGR)
-    // cv.imshow('canvasOutput54', imgOriginal);
 
-    
     // img size wanted
     let dsize = new cv.Size(width, height);
 
@@ -259,6 +268,9 @@ function filterPreProcess() {
     cv.imshow('canvasOutput4', gray);
 }
 
+/**
+ * @brief Processus d'application de filtres sur l'image
+ */
 function filtersProcess() {
     test1 = new cv.Mat();
 
@@ -279,13 +291,9 @@ function filtersProcess() {
     // Canny filter
     // canny150 + gaussian77 work aproximatively on noised image BUT arase some id card contour on not noised image
     // canny100 + gaussian77 work perfectly on noised image BUT arase some id card contour on not noised image
-    // cv.Canny(gray, edged, 100, 0)
     cv.Canny(gray, edged, 100, 0)
     cv.imshow('canvasOutput7', edged);
 
-    if(contours) {
-        contours.delete();
-    }
     contours = new cv.MatVector();
     hierarchy = new cv.Mat();
     cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
