@@ -60,9 +60,6 @@ inputElement.addEventListener('change', (e) => {
 }, false);
 
 function resizeImage() {
-    console.log('original height', imgElement.height);
-    console.log('original width', imgElement.width);
-
     if(imgElement.width > imgElement.height){
         resizeCoef=500/imgElement.height;
     }
@@ -70,13 +67,8 @@ function resizeImage() {
         resizeCoef=500/imgElement.width;
     }
 
-    console.log('resizeCoef:', resizeCoef)
-
     width = imgElement.width*resizeCoef;
     height = imgElement.height*resizeCoef;
-
-    console.log('new height:', height);
-    console.log('new width:', width);
 }
 
 
@@ -93,13 +85,9 @@ imgElement.onload = function() {
  * @brief Processus basique
  */
 function globalProcessBasic() {
-    console.log('hey');
-
-    // img read
     src = cv.imread(imgElement)
 
     contourRatio = getContoursRatio(src);
-    console.log('getContoursRatio:', contourRatio)
 
     resizeImage();
 
@@ -125,13 +113,9 @@ function globalProcessBasic() {
  * @brief Pareil que global process basic mais avec le bounding rect (estimation de rectangle)
  */
 function globalProcessBasicRect() {
-    console.log('hey');
-
-    // img read
     src = cv.imread(imgElement)
 
     contourRatio = getContoursRatio(src);
-    console.log('getContoursRatio:', contourRatio)
 
     resizeImage();
 
@@ -157,16 +141,12 @@ function globalProcessBasicRect() {
  * @brief Pareil que global process basic mais avec le calcul du contour raio avec les périmètres
  */
 function globalProcessBasicPerim() {
-    console.log('hey');
-
-    // img read
     src = cv.imread(imgElement)
 
     let mat = new cv.Mat();
     cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
     cv.Canny(mat, mat, 255, 255)
     contourRatio = getContoursRatio2(mat);
-    console.log('getContoursRatio:', contourRatio)
 
     resizeImage();
 
@@ -192,7 +172,9 @@ function globalProcessBasicPerim() {
  * @note Utilise le nombre de contours
  */
 function globalProcessAlgo1() {
+
     src = cv.imread(imgElement)
+    src = cv.imread(imgElement);
 
     resizeImage();
 
@@ -216,7 +198,6 @@ function globalProcessAlgo2() {
     cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
     cv.Canny(mat, mat, 255, 255)
     contourRatio = getContoursRatio2(mat)
-    console.log('contourRatio:', contourRatio)
 
     resizeImage();
 
@@ -268,6 +249,7 @@ function filterPreProcess() {
     cv.imshow('canvasOutput4', gray);
 }
 
+
 /**
  * @brief Processus d'application de filtres sur l'image
  */
@@ -297,7 +279,6 @@ function filtersProcess() {
     contours = new cv.MatVector();
     hierarchy = new cv.Mat();
     cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    console.log('---------------contours.size():', contours.size())
 }
 
 
@@ -315,15 +296,12 @@ function manageFiltersParameters() {
     const threashold = 50;
 
     while(!contours || contours.size() > threashold) {
-        console.log('"test":', "test")
         cannyThresholdIndex++;
         if(cannyThresholdIndex == 6) {
             gaussianKSizeIndex++;
             cannyThresholdIndex = 0;
-            console.log("hey")
         }
         if(cannyThresholdIndex == 7 || gaussianKSizeIndex == 5){
-            console.log("ho")
             break;
         }
 
@@ -346,10 +324,9 @@ function manageFiltersParameters() {
         contours = new cv.MatVector();
         hierarchy = new cv.Mat();
         cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-        console.log('---------------contours.size():', contours.size())
+        console.log('contours.size():', contours.size())
         console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
-        console.log('canny: ', cannyThreshold[cannyThresholdIndex])
-        
+        console.log('canny: ', cannyThreshold[cannyThresholdIndex])  
     }
 
     // show all contours found
@@ -377,12 +354,9 @@ function manageFiltersParameters2() {
 
     const threashold = 20000;
 
-    console.log('contourRatio:', contourRatio)
-
     while(contourRatio > threashold) {
         gaussianKSizeIndex++;
         if(gaussianKSizeIndex == 5){
-            console.log("ho")
             break;
         }
 
@@ -398,12 +372,7 @@ function manageFiltersParameters2() {
         cv.imshow('canvasOutput7', edged);
         
         contourRatio = getContoursRatio2(edged)
-        console.log('contourRatio:', contourRatio)
-        console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
-        
     }
-
-    
 
     // show all contours found
     drawAllContours();
@@ -430,7 +399,6 @@ function getContoursRatio(src) {
     let c = new cv.MatVector();
     let h = new cv.Mat();
     cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    console.log('AAA---------------contours.size():', c.size())
 
     let ratio;
     if(imgElement.width > imgElement.height){
@@ -439,8 +407,6 @@ function getContoursRatio(src) {
     else {
         ratio = c.size()/imgElement.height;
     }
-
-    console.log('ratio:', ratio)
 
     return ratio;
 }
@@ -454,14 +420,11 @@ function getContoursRatio2(src) {
     let c = new cv.MatVector();
     let h = new cv.Mat();
     cv.findContours(src, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    console.log('AAA---------------contours.size():', c.size())
     let perim = 0;
 
     for (let i = 0; i < c.size(); ++i) {
         perim = perim + cv.arcLength(c.get(i), false);
     }
-
-    // console.log('perim:', perim)
 
     return perim;
 }
@@ -739,9 +702,6 @@ function findCorners(){
     let heightRight = Math.hypot(tr.corner.x - br.corner.x, tr.corner.y - br.corner.y);
     let heightLeft = Math.hypot(tl.corner.x - bl.corner.x, tr.corner.y - bl.corner.y);
     let theHeight = (heightRight > heightLeft) ? heightRight : heightLeft;
-
-    console.log('theWidth:', theWidth)
-    console.log('theHeight:', theHeight)
 
     let finalDst = new cv.Mat();
 
