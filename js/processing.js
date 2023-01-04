@@ -15,6 +15,9 @@ let img2;
 let img3;
 let img4;
 let img5;
+let img6;
+let img7;
+let img8;
 
 // contours
 let contours;
@@ -108,6 +111,7 @@ function globalProcessBasicRect() {
     src = cv.imread(imgElement)
 
     contourRatio = getContoursRatio(src);
+    console.log('contourRatio:', contourRatio)
 
     resizeImage();
 
@@ -235,6 +239,10 @@ function filterPreProcess() {
     img3 = img.clone();
     img4 = img.clone();
     img5 = img.clone();
+    img6 = img.clone();
+    img7 = img.clone();
+    img7 = img.clone();
+    img8 = img.clone();
 
     // BGR to GRAY levels
     cv.cvtColor(img, gray, cv.COLOR_BGR2GRAY)
@@ -249,8 +257,8 @@ function filtersProcess() {
     test1 = new cv.Mat();
 
     // Billateral filter
-    // cv.bilateralFilter(gray, test2, 25, 25, 25, cv.BORDER_DEFAULT)
-    // cv.imshow('canvasOutput52', test2);
+    // cv.bilateralFilter(gray, gray, 25, 25, 25, cv.BORDER_DEFAULT)
+    // cv.imshow('canvasOutput52', gray);
 
     let ksize = new cv.Size(7, 7);
     if(contourRatio > contourRatioThreshold) {
@@ -534,6 +542,7 @@ function findLargestContourAndHull() {
 function findLargestContourAndHullRect() {
     // get first contours from contours array
     contourSelected = contours.get(0).clone(); 
+    let contourSelectedRect;
 
     // explore contours and draw all of them on the img
     // finds the bigest contour
@@ -557,7 +566,6 @@ function findLargestContourAndHullRect() {
         cv.convexHull(contourSelected, contour_pol2, false, true);
         contours_poly.push_back(contour_pol2);
         let rect2 = cv.boundingRect(contour_pol2);
-        boundRect.push_back(rect);
         contour_pol2.delete();
 
         let perimCurCtr = rect.width*rect.height;
@@ -565,6 +573,14 @@ function findLargestContourAndHullRect() {
 
         if(perimCurCtr >= perimBigCtr){
             contourSelected=contours.get(i).clone();
+            contourSelectedRect = rect2;
+            // console.log('perimCurCtr:', perimCurCtr)
+            // console.log('perimBigCtr:', perimBigCtr)
+        }
+        else {
+            contourSelectedRect = rect2;
+            // console.log('perimCurCtr:', perimCurCtr)
+            // console.log('perimBigCtr:', perimBigCtr)
         }
 
         let topLeft = new cv.Point(boundRect.get(i).x, boundRect.get(i).y);
@@ -584,6 +600,12 @@ function findLargestContourAndHullRect() {
     let hull2 = new cv.MatVector();
     biggestContourHulled = new cv.Mat()
     biggestContourHulled2 = new cv.Mat()
+
+    let testtest = new cv.MatVector();
+    testtest.push_back(contourSelected);
+    cv.drawContours(img8, testtest, 0, green, 5, cv.LINE_8, hierarchy, 0);
+    cv.cvtColor(img8, img8, cv.COLOR_BGR2RGB, 0);
+    cv.imshow('canvasOutput57', img8);
     
     // Ici le fait de hulled le contour me permet dans findcorner de le faire passé en tant que rectangle
     // alors que le contour en lui même ne serait pas passé
@@ -592,6 +614,18 @@ function findLargestContourAndHullRect() {
     cv.convexHull(contourSelected, biggestContourHulled, true, true);
     cv.approxPolyDP(biggestContourHulled, biggestContourHulled2, 100, true);
     hull2.push_back(biggestContourHulled2);
+    
+    let hull3 = new cv.MatVector();
+    hull3.push_back(biggestContourHulled);
+    console.log('hull3:', hull3)
+    cv.drawContours(img6, hull3, 0, green, 5, cv.LINE_8, hierarchy, 0);
+    cv.cvtColor(img6, img6, cv.COLOR_BGR2RGB, 0);
+    cv.imshow('canvasOutput55', img6);
+
+    let topLeft = new cv.Point(contourSelectedRect.x, contourSelectedRect.y);
+    let bottomRight = new cv.Point(contourSelectedRect.x + contourSelectedRect.width, contourSelectedRect.y + contourSelectedRect.height);
+    cv.rectangle(img7, topLeft, bottomRight, green, 2);
+    cv.imshow('canvasOutput56', img7);
 
     cv.drawContours(img5, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
     cv.cvtColor(img5, img5, cv.COLOR_BGR2RGB, 0);
@@ -606,7 +640,7 @@ function drawAllContours() {
         let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
         let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
         let randomColor =  new cv.Scalar(red,green, blue);
-        cv.drawContours(img, contours, i, randomColor, 1, cv.LINE_8, hierarchy, 1);
+        cv.drawContours(img, contours, i, randomColor, 2, cv.LINE_8, hierarchy, 1);
     }
     cv.cvtColor(img, img, cv.COLOR_BGR2RGB)
     cv.imshow('canvasOutput8', img);
