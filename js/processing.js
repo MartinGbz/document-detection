@@ -47,7 +47,13 @@ let epsilon = 55;
 /**
  * Valeur à partir de laquelle on considère qu'il y a trop de contour ou non
  */
+// for c.size()
 let contourRatioThreshold=1.5;
+// for perim
+// let contourRatioThreshold=15;
+// fore area
+// let contourRatioThreshold=50;
+
 let contourRatio;
 
 inputElement.addEventListener('change', (e) => {
@@ -75,141 +81,13 @@ imgElement.onload = function() {
     // globalProcessBasicPerim();
 }
 
-
-/**
- * @brief Processus basique
- */
-function globalProcessBasic() {
-    src = cv.imread(imgElement)
-
-    contourRatio = getContoursRatio(src);
-
-    resizeImage();
-
-    filterPreProcess();
-
-    // apply filters
-    filtersProcess();
-
-    // show all contours found
-    drawAllContours();
-
-    // Create convex hulls from different contours
-    createConvexHulls();
-
-    // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
-
-    findCorners();
-}
-
-
-/**
- * @brief Pareil que global process basic mais avec le bounding rect (estimation de rectangle)
- */
-function globalProcessBasicRect() {
-    src = cv.imread(imgElement)
-
-    contourRatio = getContoursRatio(src);
-    console.log('contourRatio:', contourRatio)
-
-    resizeImage();
-
-    filterPreProcess();
-
-    // apply filters
-    filtersProcess();
-
-    // show all contours found
-    drawAllContours();
-
-    // Create convex hulls from different contours
-    createRect();
-
-    // Draw all hulls + draw the bigest hull
-    findLargestContourAndHullRect();
-
-    findCorners();
-}
-
-
-/**
- * @brief Pareil que global process basic mais avec le calcul du contour raio avec les périmètres
- */
-function globalProcessBasicPerim() {
-    src = cv.imread(imgElement)
-
-    let mat = new cv.Mat();
-    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
-    cv.Canny(mat, mat, 255, 255)
-    contourRatio = getContoursRatio2(mat);
-
-    resizeImage();
-
-    filterPreProcess();
-    // apply filters
-    filtersProcess();
-
-    // show all contours found
-    drawAllContours();
-
-    // Create convex hulls from different contours
-    createConvexHulls();
-
-    // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
-
-    findCorners();
-}
-
-
-/**
- * @description modification canny + gaussian blur
- * @note Utilise le nombre de contours
- */
-function globalProcessAlgo1() {
-
-    src = cv.imread(imgElement)
-    src = cv.imread(imgElement);
-
-    resizeImage();
-
-    filterPreProcess();
-    // apply filters
-    filtersProcess();
-
-    manageFiltersParameters();
-    // manageFiltersParameters2();
-}
-
-
-/**
- * @description modification gaussian blur uniquement
- * @note Utilise le contour ratio (calculer à partir du périmètre)
- */
-function globalProcessAlgo2() {
-    src = cv.imread(imgElement)
-
-    let mat = new cv.Mat();
-    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
-    cv.Canny(mat, mat, 255, 255)
-    contourRatio = getContoursRatio2(mat)
-
-    resizeImage();
-
-    filterPreProcess();
-    // apply filters
-    filtersProcess();
-
-    manageFiltersParameters2();
-}
-
-
 /**
  * @brief Reformat image and finally create a gray image
  * @description Process to run before applying filters
  */
 function filterPreProcess() {
+    resizeImage();
+
     gray = new cv.Mat();
     bilateral = new cv.Mat();
     eq = new cv.Mat();
@@ -234,6 +112,7 @@ function filterPreProcess() {
     // RGB to BGR
     cv.cvtColor(srcResized, img, cv.COLOR_RGB2BGR)
     // cv.imshow('canvasOutput3', img);
+    cv.imshow('canvasOutput6', img);
 
     img2 = img.clone();
     img3 = img.clone();
@@ -261,6 +140,8 @@ function filtersProcess() {
     // cv.imshow('canvasOutput52', gray);
 
     let ksize = new cv.Size(7, 7);
+    console.log('contourRatio:', contourRatio)
+    console.log('contourRatioThreshold:', contourRatioThreshold)
     if(contourRatio > contourRatioThreshold) {
         cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
         cv.imshow('canvasOutput5', gray);
@@ -273,117 +154,14 @@ function filtersProcess() {
     // Canny filter
     // canny150 + gaussian77 work aproximatively on noised image BUT arase some id card contour on not noised image
     // canny100 + gaussian77 work perfectly on noised image BUT arase some id card contour on not noised image
+    console.log('hey:', 'hey')
     cv.Canny(gray, edged, 100, 0)
+    console.log('ho:', 'ho')
     cv.imshow('canvasOutput7', edged);
 
     contours = new cv.MatVector();
     hierarchy = new cv.Mat();
     cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-}
-
-
-/**
- * @brief Gère les filtres en fonction de l'image et créer l'image finale
- * @description En donnant une image grise en input on determine le meilleur combo canny + gaussian blur
- * pour avoir un nombre de contours < à un threashold défini
- */
-function manageFiltersParameters() {
-    let gaussianKSize = [5,7,11,29];
-    let gaussianKSizeIndex = 0;
-
-    let cannyThreshold = [0,50,100,150,200,255];
-    let cannyThresholdIndex = -1;
-    const threashold = 50;
-
-    while(!contours || contours.size() > threashold) {
-        cannyThresholdIndex++;
-        if(cannyThresholdIndex == 6) {
-            gaussianKSizeIndex++;
-            cannyThresholdIndex = 0;
-        }
-        if(cannyThresholdIndex == 7 || gaussianKSizeIndex == 5){
-            break;
-        }
-
-        let ksize = new cv.Size(gaussianKSize[gaussianKSizeIndex], gaussianKSize[gaussianKSizeIndex]);
-        cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
-        cv.imshow('canvasOutput5', test1);
-
-        // Equalize histoigram
-        cv.equalizeHist(test1, eq)
-        cv.imshow('canvasOutput6', eq);
-
-        // Canny filter
-        cv.Canny(eq, edged, cannyThreshold[cannyThresholdIndex], 0)
-        cv.imshow('canvasOutput7', edged);
-        
-        // find contours
-        if(contours) {
-            contours.delete();
-        }
-        contours = new cv.MatVector();
-        hierarchy = new cv.Mat();
-        cv.findContours(edged, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-        console.log('contours.size():', contours.size())
-        console.log('gaussian: ', gaussianKSize[gaussianKSizeIndex])
-        console.log('canny: ', cannyThreshold[cannyThresholdIndex])  
-    }
-
-    // show all contours found
-    drawAllContours();
-
-    // Create convex hulls from different contours
-    createConvexHulls();
-    // createRect();
-
-    // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
-
-    findCorners();
-}
-
-/**
- * @brief Gère les filtres en fonction de l'image et créer l'image finale
- * @description Pareil que manageFiltersParameters2 sauf que la on fait varier que le gaussian. Le canny lui reste à 100
- * Le ratio de contours ce caulcul via les perimettre des tous les contours.
- * Les contours sont récupérer à partir du canny
- */
-function manageFiltersParameters2() {
-    let gaussianKSize = [5,7,11,15,17,19];
-    let gaussianKSizeIndex = -1;
-
-    const threashold = 20000;
-
-    while(contourRatio > threashold) {
-        gaussianKSizeIndex++;
-        if(gaussianKSizeIndex == 5){
-            break;
-        }
-
-        // let ksize = new cv.Size(5, 5);
-        let ksize = new cv.Size(gaussianKSize[gaussianKSizeIndex], gaussianKSize[gaussianKSizeIndex]);
-        // let ksize = new cv.Size(29, 29);
-        // let ksize = new cv.Size(11, 11);
-        cv.GaussianBlur(gray, test1, ksize, 0, 0, cv.BORDER_DEFAULT)
-        cv.imshow('canvasOutput5', test1);
-
-        // Canny filter
-        cv.Canny(test1, edged, 100, 0)
-        cv.imshow('canvasOutput7', edged);
-        
-        contourRatio = getContoursRatio2(edged)
-    }
-
-    // show all contours found
-    drawAllContours();
-
-    // Create convex hulls from different contours
-    createConvexHulls();
-
-    // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
-
-    findCorners();
 }
 
 /**
@@ -399,6 +177,9 @@ function getContoursRatio(src) {
     let c = new cv.MatVector();
     let h = new cv.Mat();
     cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    console.log('c.size():', c.size())
+    console.log('imgElement.width:', imgElement.width)
+    console.log('imgElement.height:', imgElement.height)
 
     let ratio;
     if(imgElement.width > imgElement.height){
@@ -416,18 +197,86 @@ function getContoursRatio(src) {
  * @param {*} src image dont on doit detecter les contours
  * @returns ratio
  */
-function getContoursRatio2(src) {
+function getContoursRatioPerim(src) {
+    // let c = new cv.MatVector();
+    // let h = new cv.Mat();
+
+    let mat = new cv.Mat();
+    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
+    cv.Canny(mat, mat, 255, 255)
+
     let c = new cv.MatVector();
     let h = new cv.Mat();
-    cv.findContours(src, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+    cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
     let perim = 0;
 
     for (let i = 0; i < c.size(); ++i) {
         perim = perim + cv.arcLength(c.get(i), false);
     }
 
-    return perim;
+    let ratio;
+    if(imgElement.width > imgElement.height){
+        ratio = perim/imgElement.width;
+    }
+    else {
+        ratio = perim/imgElement.height;
+    }
+
+    console.log('perim:', perim)
+    console.log('ratio:', ratio)
+    console.log('c.size():', c.size())
+
+    return ratio;
 }
+
+/**
+ * Calcul un ratio des aires des bounding rectangles des contours en fonction de la taille de l'image
+ * @param {*} src image dont on doit detecter les contours
+ * @returns ratio
+ */
+function getContoursRatioArea(src) {
+    // let c = new cv.MatVector();
+    // let h = new cv.Mat();
+
+    let mat = new cv.Mat();
+    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
+    cv.Canny(mat, mat, 255, 255)
+
+    let c = new cv.MatVector();
+    let h = new cv.Mat();
+
+    cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    // let perim = 0;
+    let area = 0;
+
+    for (let i = 0; i < c.size(); ++i) {
+        // perim = perim + cv.arcLength(c.get(i), false);
+
+        let contour_poly = new cv.Mat();
+        // cv.approxPolyDP(contours.get(i), contour_poly, 3, true);
+        cv.convexHull(c.get(i), contour_poly, false, true);
+        let rect = cv.boundingRect(contour_poly);
+        contour_poly.delete();
+
+        area = area + rect.width*rect.height;
+    }
+
+    let ratio;
+    if(imgElement.width > imgElement.height){
+        ratio = area/imgElement.width;
+    }
+    else {
+        ratio = area/imgElement.height;
+    }
+
+    console.log('area:', area)
+    console.log('ratio:', ratio)
+    console.log('c.size():', c.size())
+
+    return ratio;
+}
+
 
 /**
  * @brief Créer des enveloppe convex (~polygone)
@@ -444,20 +293,6 @@ function createConvexHulls() {
     }
 }
 
-/**
- * @brief Créer des polygone approximées
- */
-function createPoly() {
-    hull = new cv.MatVector();
-    for (let i = 0; i < contours.size(); ++i) {
-        let tmp = new cv.Mat();
-        let cnt = contours.get(i);
-        cv.approxPolyDP(cnt, tmp, 3, true);
-
-        hull.push_back(tmp);
-        cnt.delete(); tmp.delete();
-    }
-}
 
 /**
  * @brief Créer des reactangle approximées pour chaque contours trouvés
@@ -479,162 +314,10 @@ function createRect() {
     }
 }
 
-/**
- * Draw all hulls + the bigest hull alone on the image
- */
-function findLargestContourAndHull() {
-    // get first contours from contours array
-    contourSelected = contours.get(0).clone(); 
-    // explore contours and draw all of them on the img
-    // fins the bigest contour
-    for (let i = 0; i < contours.size(); ++i) {
-        let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-
-        let color =  new cv.Scalar(red,green, blue);  
-
-        let perimCurCtr = cv.arcLength(contours.get(i), false);
-        let perimBigCtr = cv.arcLength(contourSelected, false);
-        // let areaCurCtr = cv.contourArea(contours.get(i), false);
-        // let areaBigCtr = cv.contourArea(contours.get(i), false);
-
-        if(perimCurCtr >= perimBigCtr){
-            contourSelected=contours.get(i).clone();
-        }
-        
-        cv.drawContours(img3, hull, i, color, 1, cv.LINE_8, hierarchy, 0);
-    }
-
-    console.log("contourSelected")
-    console.log(cv.arcLength(contourSelected, false))
-
-    cv.cvtColor(img3, img3, cv.COLOR_BGR2RGB)
-    cv.imshow('canvasOutput9', img3);
-
-    // crete a empty MatVector and put the bigest contour in it
-    let green = new cv.Scalar(0,255,0);
-    let contourVec = new cv.MatVector();
-    contourVec.push_back(contourSelected);
-    
-    // Draw the bigest contour on the image
-    // cv.drawContours(img4, contourVec, 0, green, 1, cv.LINE_8, hierarchy, 0);
-    // cv.cvtColor(img4, img4, cv.COLOR_BGR2RGB)
-    // cv.imshow('canvasOutput10', img4);
-
-    // Draw the bigest contour hulled on the idcard
-    let hull2 = new cv.MatVector();
-    biggestContourHulled = new cv.Mat()
-    // cv.convexHull(contourSelected, biggestContourHulled, true, true);
-    cv.approxPolyDP(contourSelected, biggestContourHulled, 3, true);
-    hull2.push_back(biggestContourHulled);
-
-    cv.drawContours(img5, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(img5, img5, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput10', img5);
-}
-
-
-/**
- * Draw all hulls + the bigest hull alone on the image
- * Compare bounding rect area of all contours (instead of perim or area of the contour)
- */
-function findLargestContourAndHullRect() {
-    // get first contours from contours array
-    contourSelected = contours.get(0).clone(); 
-    let contourSelectedRect;
-
-    // explore contours and draw all of them on the img
-    // finds the bigest contour
-    for (let i = 0; i < contours.size(); ++i) {
-        let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
-        let blue = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0)); 
-
-        let color =  new cv.Scalar(red,green, blue);  
-
-        let contour_poly = new cv.Mat();
-        // cv.approxPolyDP(contours.get(i), contour_poly, 3, true);
-        cv.convexHull(contours.get(i), contour_poly, false, true);
-        contours_poly.push_back(contour_poly);
-        let rect = cv.boundingRect(contour_poly);
-        boundRect.push_back(rect);
-        contour_poly.delete();
-
-        let contour_pol2 = new cv.Mat();
-        // cv.approxPolyDP(contourSelected, contour_pol2, 3, true);
-        cv.convexHull(contourSelected, contour_pol2, false, true);
-        contours_poly.push_back(contour_pol2);
-        let rect2 = cv.boundingRect(contour_pol2);
-        contour_pol2.delete();
-
-        let perimCurCtr = rect.width*rect.height;
-        let perimBigCtr = rect2.width*rect2.height;
-
-        if(perimCurCtr >= perimBigCtr){
-            contourSelected=contours.get(i).clone();
-            contourSelectedRect = rect2;
-            // console.log('perimCurCtr:', perimCurCtr)
-            // console.log('perimBigCtr:', perimBigCtr)
-        }
-        else {
-            contourSelectedRect = rect2;
-            // console.log('perimCurCtr:', perimCurCtr)
-            // console.log('perimBigCtr:', perimBigCtr)
-        }
-
-        let topLeft = new cv.Point(boundRect.get(i).x, boundRect.get(i).y);
-        let bottomRight = new cv.Point(boundRect.get(i).x + boundRect.get(i).width, boundRect.get(i).y + boundRect.get(i).height);
-        cv.rectangle(img3, topLeft, bottomRight, color, 2);
-    }
-
-    cv.cvtColor(img3, img3, cv.COLOR_BGR2RGB)
-    cv.imshow('canvasOutput9', img3);
-
-    // crete a empty MatVector and put the bigest contour in it
-    let green = new cv.Scalar(0,255,0);
-    let contourVec = new cv.MatVector();
-    contourVec.push_back(contourSelected);
-
-    // Draw the bigest contour hulled on the idcard
-    let hull2 = new cv.MatVector();
-    biggestContourHulled = new cv.Mat()
-    biggestContourHulled2 = new cv.Mat()
-
-    let testtest = new cv.MatVector();
-    testtest.push_back(contourSelected);
-    cv.drawContours(img8, testtest, 0, green, 5, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(img8, img8, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput57', img8);
-    
-    // Ici le fait de hulled le contour me permet dans findcorner de le faire passé en tant que rectangle
-    // alors que le contour en lui même ne serait pas passé
-    // le mieux serait d'utiliser la fonction boudingRect (utilisé dans findcorner2) mais pour l'instant l'homographie findcroner2 ne marche pas.
-    // mais une fois ça résolut c'est good.
-    cv.convexHull(contourSelected, biggestContourHulled, true, true);
-    cv.approxPolyDP(biggestContourHulled, biggestContourHulled2, 100, true);
-    hull2.push_back(biggestContourHulled2);
-    
-    let hull3 = new cv.MatVector();
-    hull3.push_back(biggestContourHulled);
-    console.log('hull3:', hull3)
-    cv.drawContours(img6, hull3, 0, green, 5, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(img6, img6, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput55', img6);
-
-    let topLeft = new cv.Point(contourSelectedRect.x, contourSelectedRect.y);
-    let bottomRight = new cv.Point(contourSelectedRect.x + contourSelectedRect.width, contourSelectedRect.y + contourSelectedRect.height);
-    cv.rectangle(img7, topLeft, bottomRight, green, 2);
-    cv.imshow('canvasOutput56', img7);
-
-    cv.drawContours(img5, hull2, 0, green, 5, cv.LINE_8, hierarchy, 0);
-    cv.cvtColor(img5, img5, cv.COLOR_BGR2RGB, 0);
-    cv.imshow('canvasOutput10', img5);
-}
-
 
 // Draw all contours found on the image
 function drawAllContours() {
+    console.log('hey')
     for (let i = 0; i < contours.size(); ++i) {
         let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
         let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
