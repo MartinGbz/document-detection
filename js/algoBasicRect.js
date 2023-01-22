@@ -4,10 +4,9 @@
 function globalProcessBasicRect() {
     src = cv.imread(imgElement)
 
-    contourRatio = getContoursRatio(src);
+    contourRatio = getContoursRatioSize(src);
     // contourRatio = getContoursRatioArea(src);
-    console.log('contourRatio:', contourRatio)
-    
+
     filterPreProcess();
 
     // apply filters
@@ -16,11 +15,8 @@ function globalProcessBasicRect() {
     // show all contours found
     drawAllContours();
 
-    // Create convex hulls from different contours
-    createRect();
-
-    // Draw all hulls + draw the bigest hull
-    findLargestContourAndHullRect();
+    // Draw all hulls + draw the bigest hullF
+    findBiggestContourAndHullRect();
 
     findCorners();
 }
@@ -29,10 +25,14 @@ function globalProcessBasicRect() {
  * Draw all hulls + the bigest hull alone on the image
  * Compare bounding rect area of all contours (instead of perim or area of the contour)
  */
-function findLargestContourAndHullRect() {
+function findBiggestContourAndHullRect() {
     // get first contours from contours array
+    console.log('contours:', contours)
     contourSelected = contours.get(0).clone(); 
+    
     let contourSelectedRect;
+    
+    boundRect = new cv.RectVector();
 
     // explore contours and draw all of them on the img
     // finds the bigest contour
@@ -46,7 +46,6 @@ function findLargestContourAndHullRect() {
         let contour_poly = new cv.Mat();
         // cv.approxPolyDP(contours.get(i), contour_poly, 3, true);
         cv.convexHull(contours.get(i), contour_poly, false, true);
-        contours_poly.push_back(contour_poly);
         let rect = cv.boundingRect(contour_poly);
         boundRect.push_back(rect);
         contour_poly.delete();
@@ -54,7 +53,6 @@ function findLargestContourAndHullRect() {
         let contour_pol2 = new cv.Mat();
         // cv.approxPolyDP(contourSelected, contour_pol2, 3, true);
         cv.convexHull(contourSelected, contour_pol2, false, true);
-        contours_poly.push_back(contour_pol2);
         let rect2 = cv.boundingRect(contour_pol2);
         contour_pol2.delete();
 
@@ -64,13 +62,9 @@ function findLargestContourAndHullRect() {
         if(areaCurCtr >= areaBigCtr){
             contourSelected=contours.get(i).clone();
             contourSelectedRect = rect2;
-            // console.log('areaCurCtr:', areaCurCtr)
-            // console.log('areaBigCtr:', areaBigCtr)
         }
         else {
             contourSelectedRect = rect2;
-            // console.log('areaCurCtr:', areaCurCtr)
-            // console.log('areaBigCtr:', areaBigCtr)
         }
 
         let topLeft = new cv.Point(boundRect.get(i).x, boundRect.get(i).y);
@@ -81,7 +75,7 @@ function findLargestContourAndHullRect() {
     cv.cvtColor(img3, img3, cv.COLOR_BGR2RGB)
     cv.imshow('canvasOutput9', img3);
 
-    // crete a empty MatVector and put the bigest contour in it
+    // create an empty MatVector and put the biggest contour in it
     let green = new cv.Scalar(0,255,0);
     let contourVec = new cv.MatVector();
     contourVec.push_back(contourSelected);
@@ -89,7 +83,7 @@ function findLargestContourAndHullRect() {
     // Draw the bigest contour hulled on the idcard
     let hull2 = new cv.MatVector();
     biggestContourHulled = new cv.Mat()
-    biggestContourHulled2 = new cv.Mat()
+    // biggestContourHulled2 = new cv.Mat()
 
     let testtest = new cv.MatVector();
     testtest.push_back(contourSelected);
@@ -102,16 +96,25 @@ function findLargestContourAndHullRect() {
     // le mieux serait d'utiliser la fonction boudingRect (utilisé dans findcorner2) mais pour l'instant l'homographie findcroner2 ne marche pas.
     // mais une fois ça résolut c'est good.
     cv.convexHull(contourSelected, biggestContourHulled, true, true);
-    cv.approxPolyDP(biggestContourHulled, biggestContourHulled2, 100, true);
+
+
+    // let a = new cv.Mat(biggestContourHulled)
+    // let minRect = cv.minAreaRect(a);
+    // console.log('minRect:', minRect)
+    // let topLeft2 = new cv.Point(minRect.center.x, minRect.center.y);
+    // let bottomRight2 = new cv.Point(minRect.center.x + minRect.size.width, minRect.center.y + minRect.size.height);
+    // cv.rectangle(img9, topLeft2, bottomRight2, green, 2);
+    // cv.imshow('canvasOutput13', img9);
+
+    cv.approxPolyDP(biggestContourHulled, biggestContourHulled, 100, true);
     
     // let rect2 = cv.boundingRect(biggestContourHulled);
     // biggestContourHulled2 = img5.roi(rect2);
     
-    hull2.push_back(biggestContourHulled2);
+    hull2.push_back(biggestContourHulled);
     
     let hull3 = new cv.MatVector();
     hull3.push_back(biggestContourHulled);
-    console.log('hull3:', hull3)
     cv.drawContours(img6, hull3, 0, green, 5, cv.LINE_8, hierarchy, 0);
     cv.cvtColor(img6, img6, cv.COLOR_BGR2RGB, 0);
     cv.imshow('canvasOutput55', img6);

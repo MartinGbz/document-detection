@@ -21,6 +21,7 @@ function globalProcessAlgo1() {
  * pour avoir un nombre de contours < à un threashold défini
  */
 function manageFiltersParameters() {
+    test1 = new cv.Mat();
     let gaussianKSize = [5,7,11,29];
     let gaussianKSizeIndex = 0;
 
@@ -67,10 +68,9 @@ function manageFiltersParameters() {
 
     // Create convex hulls from different contours
     createConvexHulls();
-    // createRect();
 
     // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
+    findBiggestContourAndHull();
 
     findCorners();
 }

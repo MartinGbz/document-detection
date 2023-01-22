@@ -18,6 +18,7 @@ let img5;
 let img6;
 let img7;
 let img8;
+let img9;
 
 // contours
 let contours;
@@ -31,23 +32,20 @@ let contourSelected;
 let imgOriginal;
 let dsizeOriginal;
 
-let resizeCoef = 1;
-
+let resizeCoef;
 let widthResized;
 let heightResized;
 
-let contours_poly;
 let boundRect;
 
-// Cette valeur determine si oui ou non on considère le contour comme un rectangle
-// approximation très précise du contour = épsilon petit.
-// polygone approximé avec un nombre de points raisonnable = épsilon plus grand.
-let epsilon = 55;
+let ratioMat;
+let ratioContours;
+let hierarchyContours;
 
 /**
  * Valeur à partir de laquelle on considère qu'il y a trop de contour ou non
  */
-// for c.size()
+// for size
 let contourRatioThreshold=1.5;
 // for perim
 // let contourRatioThreshold=15;
@@ -74,26 +72,34 @@ function resizeImage() {
 
 
 imgElement.onload = function() {
+    initMats();
     // globalProcessBasic();
-    globalProcessBasicRect();
+    // globalProcessBasicRect();
     // globalProcessAlgo1();
     // globalProcessAlgo2();
+    globalProcessAlgo3();
     // globalProcessBasicPerim();
 }
 
-/**
- * @brief Reformat image and finally create a gray image
- * @description Process to run before applying filters
- */
-function filterPreProcess() {
-    resizeImage();
-
+function initMats() {
     gray = new cv.Mat();
     bilateral = new cv.Mat();
     eq = new cv.Mat();
     edged = new cv.Mat();
     srcResized = new cv.Mat();
     img = new cv.Mat();
+
+    ratioMat = new cv.Mat();
+    ratioContours = new cv.MatVector();
+    hierarchyContours = new cv.Mat();
+}
+
+/**
+ * Reformat image and finally create a gray image
+ * @description Process to run before applying filters
+ */
+function filterPreProcess() {
+    resizeImage();
 
     // get original image
     let srcResizedOriginal = new cv.Mat();
@@ -122,6 +128,7 @@ function filterPreProcess() {
     img7 = img.clone();
     img7 = img.clone();
     img8 = img.clone();
+    img9 = img.clone();
 
     // BGR to GRAY levels
     cv.cvtColor(img, gray, cv.COLOR_BGR2GRAY)
@@ -130,10 +137,9 @@ function filterPreProcess() {
 
 
 /**
- * @brief Processus d'application de filtres sur l'image
+ * Processus d'application de filtres sur l'image
  */
 function filtersProcess() {
-    test1 = new cv.Mat();
 
     // Billateral filter
     // cv.bilateralFilter(gray, gray, 25, 25, 25, cv.BORDER_DEFAULT)
@@ -143,6 +149,7 @@ function filtersProcess() {
     console.log('contourRatio:', contourRatio)
     console.log('contourRatioThreshold:', contourRatioThreshold)
     if(contourRatio > contourRatioThreshold) {
+        // comment si utilisation de algo1 2 ou 3
         cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
         cv.imshow('canvasOutput5', gray);
     }
@@ -152,11 +159,7 @@ function filtersProcess() {
     // cv.imshow('canvasOutput6', gray);
 
     // Canny filter
-    // canny150 + gaussian77 work aproximatively on noised image BUT arase some id card contour on not noised image
-    // canny100 + gaussian77 work perfectly on noised image BUT arase some id card contour on not noised image
-    console.log('hey:', 'hey')
     cv.Canny(gray, edged, 100, 0)
-    console.log('ho:', 'ho')
     cv.imshow('canvasOutput7', edged);
 
     contours = new cv.MatVector();
@@ -169,24 +172,19 @@ function filtersProcess() {
  * @param {*} src image dont on doit detecter les contours
  * @returns ratio
  */
-function getContoursRatio(src) {
-    let mat = new cv.Mat();
-    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
-    cv.Canny(mat, mat, 255, 255)
+function getContoursRatioSize(src) {
+    let ratio = 1;
 
-    let c = new cv.MatVector();
-    let h = new cv.Mat();
-    cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    console.log('c.size():', c.size())
-    console.log('imgElement.width:', imgElement.width)
-    console.log('imgElement.height:', imgElement.height)
+    cv.cvtColor(src, ratioMat, cv.COLOR_BGR2GRAY)
+    cv.Canny(ratioMat, ratioMat, 255, 255)
 
-    let ratio;
+    cv.findContours(ratioMat, ratioContours, hierarchyContours, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
     if(imgElement.width > imgElement.height){
-        ratio = c.size()/imgElement.width;
+        ratio = ratioContours.size()/imgElement.width;
     }
     else {
-        ratio = c.size()/imgElement.height;
+        ratio = ratioContours.size()/imgElement.height;
     }
 
     return ratio;
@@ -198,34 +196,24 @@ function getContoursRatio(src) {
  * @returns ratio
  */
 function getContoursRatioPerim(src) {
-    // let c = new cv.MatVector();
-    // let h = new cv.Mat();
-
-    let mat = new cv.Mat();
-    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
-    cv.Canny(mat, mat, 255, 255)
-
-    let c = new cv.MatVector();
-    let h = new cv.Mat();
-
-    cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    let ratio = 1;
     let perim = 0;
 
-    for (let i = 0; i < c.size(); ++i) {
-        perim = perim + cv.arcLength(c.get(i), false);
+    cv.cvtColor(src, ratioMat, cv.COLOR_BGR2GRAY)
+    cv.Canny(ratioMat, ratioMat, 255, 255)
+
+    cv.findContours(ratioMat, ratioContours, hierarchyContours, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+    for (let i = 0; i < ratioContours.size(); ++i) {
+        perim = perim + cv.arcLength(ratioContours.get(i), false);
     }
 
-    let ratio;
     if(imgElement.width > imgElement.height){
         ratio = perim/imgElement.width;
     }
     else {
         ratio = perim/imgElement.height;
     }
-
-    console.log('perim:', perim)
-    console.log('ratio:', ratio)
-    console.log('c.size():', c.size())
 
     return ratio;
 }
@@ -236,33 +224,22 @@ function getContoursRatioPerim(src) {
  * @returns ratio
  */
 function getContoursRatioArea(src) {
-    // let c = new cv.MatVector();
-    // let h = new cv.Mat();
-
-    let mat = new cv.Mat();
-    cv.cvtColor(src, mat, cv.COLOR_BGR2GRAY)
-    cv.Canny(mat, mat, 255, 255)
-
-    let c = new cv.MatVector();
-    let h = new cv.Mat();
-
-    cv.findContours(mat, c, h, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    // let perim = 0;
+    let ratio = 1;
     let area = 0;
 
-    for (let i = 0; i < c.size(); ++i) {
-        // perim = perim + cv.arcLength(c.get(i), false);
+    cv.cvtColor(src, ratioMat, cv.COLOR_BGR2GRAY)
+    cv.Canny(ratioMat, ratioMat, 255, 255)
 
+    cv.findContours(ratioMat, ratioContours, hierarchyContours, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
+    for (let i = 0; i < ratioContours.size(); ++i) {
         let contour_poly = new cv.Mat();
-        // cv.approxPolyDP(contours.get(i), contour_poly, 3, true);
-        cv.convexHull(c.get(i), contour_poly, false, true);
+        cv.convexHull(ratioContours.get(i), contour_poly, false, true);
         let rect = cv.boundingRect(contour_poly);
         contour_poly.delete();
-
         area = area + rect.width*rect.height;
     }
 
-    let ratio;
     if(imgElement.width > imgElement.height){
         ratio = area/imgElement.width;
     }
@@ -270,16 +247,12 @@ function getContoursRatioArea(src) {
         ratio = area/imgElement.height;
     }
 
-    console.log('area:', area)
-    console.log('ratio:', ratio)
-    console.log('c.size():', c.size())
-
     return ratio;
 }
 
 
 /**
- * @brief Créer des enveloppe convex (~polygone)
+ * Créer des enveloppe convex (~polygone)
  */
 function createConvexHulls() {
     hull = new cv.MatVector();
@@ -295,29 +268,9 @@ function createConvexHulls() {
 
 
 /**
- * @brief Créer des reactangle approximées pour chaque contours trouvés
- * @description approxPolyDP va permettre d'estimer un polygon quelconque en fonction du contour
- * Ensuite la fonction boundingRect() va permettre d'estimer un rectangle à partir du polygon
+ * Draw all contours found on the image
  */
-function createRect() {
-    contours_poly = new cv.MatVector();
-    boundRect = new cv.RectVector();
-
-    for (let i = 0; i < contours.size(); i++) {
-        let contour = contours.get(i);
-        let contour_poly = new cv.Mat();
-        cv.approxPolyDP(contour, contour_poly, 3, true);
-        contours_poly.push_back(contour_poly);
-
-        let rect = cv.boundingRect(contour_poly);
-        boundRect.push_back(rect);
-    }
-}
-
-
-// Draw all contours found on the image
 function drawAllContours() {
-    console.log('hey')
     for (let i = 0; i < contours.size(); ++i) {
         let red = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
         let green = Math.floor(Math.random() * (Math.floor(255) - Math.ceil(0) + 1) + Math.ceil(0));
@@ -336,6 +289,11 @@ function drawAllContours() {
  * @returns true if a rectangle is found and false if not found
  */
 function testAprox(biggestContour) {
+    // Cette valeur determine si oui ou non on considère le contour comme un rectangle
+    // approximation très précise du contour = épsilon petit.
+    // polygone approximé avec un nombre de points raisonnable = épsilon plus grand.
+    let epsilon = 55;
+    
     //Ensure the top area contour has 4 corners (NOTE: This is not a perfect science and likely needs more attention)
     let approx = new cv.Mat();
     // cv.approxPolyDP(biggestContour, approx, .05 * cv.arcLength(biggestContour, false), true);
@@ -353,30 +311,21 @@ function testAprox(biggestContour) {
 
 
 /**
- * Trouve les coins de la CNI et crop + homogrpahie et produit donc une image de la CNI rognée
+ * 
+ * @returns true if a rectangle is found and false if not found
  */
 function findCorners(){
-    // epsilon = .05 * cv.arcLength(biggestContourHulled, false);
-    // console.log('epsilon:', epsilon)
-    // let approx = new cv.Mat();
-    // let approx2 = new cv.Mat();
-    // cv.approxPolyDP(biggestContourHulled, approx, .05 * cv.arcLength(biggestContourHulled, false), true);
-    // cv.approxPolyDP(biggestContourHulled, approx, 100, true);
-    // cv.approxPolyDP(contourSelected, approx2, 3, true);
-    // let approx = cv.boundingRect(approx2);
-    // console.log('approx:', approx)
-
     let green = new cv.Scalar(0,0,255);
     let contourVec = new cv.MatVector();
-    contourVec.push_back(biggestContourHulled2);
+    contourVec.push_back(biggestContourHulled);
     // Draw the bigest contour on the image
     cv.drawContours(img4, contourVec, 0, green, 3, cv.LINE_8, hierarchy, 0);
     cv.cvtColor(img4, img4, cv.COLOR_BGR2RGB)
     cv.imshow('canvasOutput54', img4);
 
-    if (biggestContourHulled2.rows == 4) {
+    if (biggestContourHulled.rows == 4) {
         console.log('Found a 4-corner approx');
-        foundContour = biggestContourHulled2;
+        foundContour = biggestContourHulled;
     }
     else{
         console.log('No 4-corner large contour!');

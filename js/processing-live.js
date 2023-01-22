@@ -54,7 +54,7 @@ function globalProcess(src) {
 
     // // Draw all hulls + draw the bigest hull
     if(contours.get(0)) {
-        findLargestContourAndHull(); 
+        findBiggestContourAndHull(); 
         // biggestContourHulled.delete();
     }
 
@@ -152,7 +152,7 @@ function createConvexHulls() {
 }
 
 // Draw all hulls + the bigest hull alone on the image
-function findLargestContourAndHull() {
+function findBiggestContourAndHull() {
     // get first contours from contours array
     contourSelected = contours.get(0).clone(); 
     // explore contours and draw all of them on the img

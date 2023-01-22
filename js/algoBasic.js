@@ -4,7 +4,7 @@
 function globalProcessBasic() {
     src = cv.imread(imgElement)
 
-    contourRatio = getContoursRatio(src);
+    contourRatio = getContoursRatioSize(src);
 
     filterPreProcess();
 
@@ -18,7 +18,7 @@ function globalProcessBasic() {
     createConvexHulls();
 
     // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
+    findBiggestContourAndHull();
 
     findCorners();
 }
@@ -45,7 +45,7 @@ function globalProcessBasicPerim() {
     createConvexHulls();
 
     // Draw all hulls + draw the bigest hull
-    findLargestContourAndHull();
+    findBiggestContourAndHull();
 
     findCorners();
 }
@@ -53,7 +53,7 @@ function globalProcessBasicPerim() {
 /**
  * Draw all hulls + the bigest hull alone on the image
  */
-function findLargestContourAndHull() {
+function findBiggestContourAndHull() {
     // get first contours from contours array
     contourSelected = contours.get(0).clone(); 
     // explore contours and draw all of them on the img
