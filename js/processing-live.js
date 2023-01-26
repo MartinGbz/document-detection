@@ -51,8 +51,8 @@ function globalProcess(src) {
 
     // // Draw all hulls + draw the bigest hull
     if(contours.get(0)) {
-        // findBiggestContourAndHull(); 
-        findBiggestContourAndHullRect();
+        // findBiggestContourAndHull2(); 
+        findBiggestContourAndHullRect2();
         // biggestContourHulled.delete();
     }
 
@@ -140,7 +140,7 @@ function createConvexHulls() {
 }
 
 // Draw all hulls + the bigest hull alone on the image
-function findBiggestContourAndHull() {
+function findBiggestContourAndHull2() {
     // get first contours from contours array
     contourSelected = contours.get(0).clone(); 
     // explore contours and draw all of them on the img
@@ -171,7 +171,7 @@ function findBiggestContourAndHull() {
  * Draw all hulls + the bigest hull alone on the image
  * Compare bounding rect area of all contours (instead of perim or area of the contour)
  */
-function findBiggestContourAndHullRect() {
+function findBiggestContourAndHullRect2() {
     // get first contours from contours array
     console.log('contours:', contours)
     contourSelected = contours.get(0).clone(); 

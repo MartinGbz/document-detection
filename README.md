@@ -6,6 +6,8 @@ The project uses OpenCV.js
 
 ### Live mode (default mode)
 Uncomment all `<!-- /// LIVE \\\ -->` `<!-- /// LIVE - END \\\ -->` blocks in `index.html`
+Comment all `<!-- /// SINGLE IMAGE \\\ -->` `<!-- /// SINGLE IMAGE - END \\\ -->` blocks in `index.html`
 
 ### Single image mode
-comment all `<!-- /// LIVE \\\ -->` `<!-- /// LIVE - END \\\ -->` blocks in `index.html`
+Comment all `<!-- /// LIVE \\\ -->` `<!-- /// LIVE - END \\\ -->` blocks in `index.html`
+Uncomment all `<!-- /// SINGLE IMAGE \\\ -->` `<!-- /// SINGLE IMAGE - END \\\ -->` blocks in `index.html`
