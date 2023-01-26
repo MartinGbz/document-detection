@@ -8,11 +8,18 @@
 <h2>Hello OpenCV.js</h2>
 <p id="status">OpenCV.js is loading...</p>
 <div>
-  <!-- <div class="inputoutput">
+  <!-- /// LIVE \\\ -->
+  <div class="inputoutput">
     <h2>video</h2>
     <video id="videoInput" height="960px" width="1440"></video>
     <div class="caption">video</div>
-  </div> -->
+  </div>
+  <div class="inputoutput">
+    <canvas id="videoOutput" willReadFrequently="true"></canvas>
+    <div class="caption">videoOutput</div>
+  </div>
+  <!-- /// LIVE -- END \\\ -->
+  
   <div class="inputoutput">
     <img id="imageSrc" alt="No Image" style="display: none;"/>
     <div class="caption">imageSrc <input type="file" id="fileInput" name="file" /></div>
@@ -114,18 +121,19 @@
 <!-- <script type="text/javascript" src="libs/opencv-4.0.1.js"></script> -->
 <!-- <script type="text/javascript" src="libs/opencv-3.4.13.js"></script> -->
 <!-- <script type="text/javascript" src="libs/opencv-3.4.7.js"></script> -->
-
 <!-- <script type="text/javascript" src="libs/opencv-3.4.5.js"></script> -->
 
 <script type="text/javascript" src="./js/video.js"></script>
 
-<!-- <script type="text/javascript" onload="onOpenCvReady();" src="./js/processing-live.js"></script> -->
-<script type="text/javascript" onload="onOpenCvReady();" src="./js/processing.js"></script>
+<!-- /// LIVE \\\ -->
+<script type="text/javascript" onload="onOpenCvReady();" src="./js/processing-live.js"></script>
+
+<!-- <script type="text/javascript" onload="onOpenCvReady();" src="./js/processing.js"></script>
 <script type="text/javascript" onload="onOpenCvReady();" src="./js/algo1.js"></script>
 <script type="text/javascript" onload="onOpenCvReady();" src="./js/algo2.js"></script>
 <script type="text/javascript" onload="onOpenCvReady();" src="./js/algo3.js"></script>
 <script type="text/javascript" onload="onOpenCvReady();" src="./js/algoBasic.js"></script>
-<script type="text/javascript" onload="onOpenCvReady();" src="./js/algoBasicRect.js"></script>
+<script type="text/javascript" onload="onOpenCvReady();" src="./js/algoBasicRect.js"></script> -->
 <!-- <script type="text/javascript" src="./js/processingOriginal.js"> -->
 </script>
 

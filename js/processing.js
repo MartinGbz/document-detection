@@ -74,10 +74,10 @@ function resizeImage() {
 imgElement.onload = function() {
     initMats();
     // globalProcessBasic();
-    // globalProcessBasicRect();
+    globalProcessBasicRect();
     // globalProcessAlgo1();
     // globalProcessAlgo2();
-    globalProcessAlgo3();
+    // globalProcessAlgo3();
     // globalProcessBasicPerim();
 }
 
@@ -150,8 +150,8 @@ function filtersProcess() {
     console.log('contourRatioThreshold:', contourRatioThreshold)
     if(contourRatio > contourRatioThreshold) {
         // comment si utilisation de algo1 2 ou 3
-        cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
-        cv.imshow('canvasOutput5', gray);
+        // cv.GaussianBlur(gray, gray, ksize, 0, 0, cv.BORDER_DEFAULT)
+        // cv.imshow('canvasOutput5', gray);
     }
 
     // // Equalize histoigram

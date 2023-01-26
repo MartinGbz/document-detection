@@ -29,7 +29,7 @@ function startVideo() {
             cap.read(src);
             dst = globalProcess(src);
             // cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
-            cv.imshow("canvasOutput", dst);
+            cv.imshow("videoOutput", dst);
             // document.getElementById("canvasOutput").getContext("2d", { willReadFrequently: true })
             // schedule the next one.
             let delay = 1000 / FPS - (Date.now() - begin);
